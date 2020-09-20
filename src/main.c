@@ -2,8 +2,18 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_primitives.h>
 
 #define ASSETS_DIR "../assets"
+
+#define WORLD_W 162
+#define WORLD_H 122
+
+char world[WORLD_W][WORLD_H];
+typedef enum
+{
+    Air, Stone, Sand
+} MATERIAL;
 
 void must_init(bool test, const char *description)
 {
@@ -11,6 +21,49 @@ void must_init(bool test, const char *description)
 
     printf("couldn't initialize %s\n", description);
     exit(1);
+}
+
+void world_init()
+{
+    int i, j;
+    for(i = 0; i < WORLD_W; i++)
+    {
+        for(j = 0; j < WORLD_H; j++)
+        {
+            world[i][j] = Air;
+        }
+    }
+}
+
+void world_render()
+{
+    ALLEGRO_COLOR color;
+
+    int i, j;
+    for(i = 0; i < WORLD_W; i++)
+    {
+        for(j = 0; j < WORLD_H; j++)
+        {
+            switch(world[i][j])
+            {
+                case Stone:
+                    color = al_map_rgb_f(0.5, 0.5, 0.5);
+                    break;
+                case Sand:
+                    color = al_map_rgb_f(0.7, 0.7, 0.5);
+                    break;
+                default:
+                    color = al_map_rgb_f(0.0, 0.0, 0.0);
+                    break;
+            }
+
+            float x1 = (i - 1)*4;
+            float y1 = (j - 1)*4;
+            float x2 = x1 + 4;
+            float y2 = x2 + 4;
+            al_draw_filled_rectangle(x1, y1, x2, y2, color);
+        }
+    }
 }
 
 int main()
@@ -39,9 +92,13 @@ int main()
     must_init(mysha, "mysha");
     al_destroy_path(path);
 
+    must_init(al_init_primitives_addon(), "primitives addon");
+
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
+
+    world_init();
 
     bool done = false;
     bool redraw = true;
@@ -73,7 +130,8 @@ int main()
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_text(font, al_map_rgb(255, 255, 255), 0, 0, 0, "Hello world!");
             
-            al_draw_bitmap(mysha, 100, 100, 0);
+            // al_draw_bitmap(mysha, 100, 100, 0);
+            world_render();
             
             al_flip_display();
 
