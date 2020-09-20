@@ -25,12 +25,70 @@ void must_init(bool test, const char *description)
 
 void world_init()
 {
+    memset(world, Air, WORLD_W*WORLD_H);
+}
+
+bool world_get_updated(int cell_x, int cell_y)
+{
+    return (world[cell_x][cell_y] >> 7) & 1;
+}
+
+void world_set_updated(int cell_x, int cell_y, bool b)
+{
+    if(b)
+        world[cell_x][cell_y] |= (1 << 7);
+    else
+        world[cell_x][cell_y] &= (~(1 << 7));
+}
+
+MATERIAL world_get_cell(int cell_x, int cell_y)
+{
+    return (world[cell_x][cell_y] & 127);
+}
+
+void world_set_cell(int cell_x, int cell_y, MATERIAL m)
+{
+    world[cell_x][cell_y] = world_get_updated(cell_x, cell_y) | m;
+}
+
+bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
+{
+    if(world[dst_x][dst_y])
+        return false;
+
+    world_set_cell(dst_x, dst_y, world[src_x][src_y]);
+    world_set_updated(dst_x, dst_y, true);
+    world_set_cell(src_x, src_y, Air);
+    return true;
+}
+
+void world_update()
+{
     int i, j;
-    for(i = 0; i < WORLD_W; i++)
+    for(i = 1; i < WORLD_W - 1; i++)
     {
-        for(j = 0; j < WORLD_H; j++)
+        for(j = 1; j < WORLD_H - 1; j++)
         {
-            world[i][j] = Air;
+            if(world_get_updated(i, j)) // get 7th bit
+            {
+                world_set_updated(i, j, false); // clear 7th bit
+                continue;
+            }
+
+            switch(world[i][j])
+            {
+                case Sand:
+                    if(world[i][j + 1])
+                    {
+                        if(!world[i - 1][j + 1])
+                            world_move_cell(i, j, i - 1, j + 1);
+                        else if(!world[i + 1][j + 1])
+                            world_move_cell(i, j, i + 1, j + 1);
+                    }
+                    else
+                        world_move_cell(i, j, i, j + 1);
+                    break;
+            }
         }
     }
 }
@@ -40,9 +98,9 @@ void world_render()
     ALLEGRO_COLOR color;
 
     int i, j;
-    for(i = 0; i < WORLD_W; i++)
+    for(i = 1; i < WORLD_W - 1; i++)
     {
-        for(j = 0; j < WORLD_H; j++)
+        for(j = 1; j < WORLD_H - 1; j++)
         {
             switch(world[i][j])
             {
@@ -53,14 +111,13 @@ void world_render()
                     color = al_map_rgb_f(0.7, 0.7, 0.5);
                     break;
                 default:
-                    color = al_map_rgb_f(0.0, 0.0, 0.0);
-                    break;
+                    continue;
             }
 
             float x1 = (i - 1)*4;
             float y1 = (j - 1)*4;
             float x2 = x1 + 4;
-            float y2 = x2 + 4;
+            float y2 = y1 + 4;
             al_draw_filled_rectangle(x1, y1, x2, y2, color);
         }
     }
@@ -70,6 +127,7 @@ int main()
 {
     must_init(al_init(), "allegro");
     must_init(al_install_keyboard(), "keyboard");
+    must_init(al_install_mouse(), "mouse");
 
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     must_init(timer, "timer");
@@ -95,6 +153,7 @@ int main()
     must_init(al_init_primitives_addon(), "primitives addon");
 
     al_register_event_source(queue, al_get_keyboard_event_source());
+    al_register_event_source(queue, al_get_mouse_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
 
@@ -104,6 +163,8 @@ int main()
     bool redraw = true;
     ALLEGRO_EVENT event;
 
+    ALLEGRO_MOUSE_STATE state;
+
     al_start_timer(timer);
     while(1)
     {
@@ -112,7 +173,12 @@ int main()
         switch(event.type)
         {
             case ALLEGRO_EVENT_TIMER:
-                // game logic goes here
+                al_get_mouse_state(&state);
+                if(state.buttons & 1)
+                    world_set_cell(state.x / 4, state.y / 4, Sand);
+
+                world_update();
+
                 redraw = true;
                 break;
 
@@ -128,9 +194,8 @@ int main()
         if(redraw && al_is_event_queue_empty(queue))
         {
             al_clear_to_color(al_map_rgb(0, 0, 0));
-            al_draw_text(font, al_map_rgb(255, 255, 255), 0, 0, 0, "Hello world!");
-            
-            // al_draw_bitmap(mysha, 100, 100, 0);
+
+            al_draw_bitmap(mysha, 0, 0, 0);
             world_render();
             
             al_flip_display();
