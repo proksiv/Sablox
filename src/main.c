@@ -12,8 +12,27 @@
 char world[WORLD_W][WORLD_H];
 typedef enum
 {
-    Air, Stone, Sand
+    Air, Stone, Sand, Wood, Fire, MaterialCount
 } MATERIAL;
+
+const char *material_name(MATERIAL m)
+{
+    switch(m)
+    {
+        case Air:
+            return "Air";
+        case Stone:
+            return "Stone";
+        case Sand:
+            return "Sand";
+        case Wood:
+            return "Wood";
+        case Fire:
+            return "Fire";
+        default:
+            return "Undefined";
+    }
+}
 
 void must_init(bool test, const char *description)
 {
@@ -41,6 +60,18 @@ void world_set_updated(int cell_x, int cell_y, bool b)
         world[cell_x][cell_y] &= (~(1 << 7));
 }
 
+void world_clear_updates()
+{
+    int i, j;
+    for(i = 1; i < WORLD_W - 1; i++)
+    {
+        for(j = 1; j < WORLD_H - 1; j++)
+        {
+            world_set_updated(i, j, false);
+        }
+    }
+}
+
 MATERIAL world_get_cell(int cell_x, int cell_y)
 {
     return (world[cell_x][cell_y] & 127);
@@ -48,15 +79,27 @@ MATERIAL world_get_cell(int cell_x, int cell_y)
 
 void world_set_cell(int cell_x, int cell_y, MATERIAL m)
 {
-    world[cell_x][cell_y] = world_get_updated(cell_x, cell_y) | m;
+    world[cell_x][cell_y] = (world_get_updated(cell_x, cell_y) << 7) | m;
+}
+
+void world_paint(int cell_x, int cell_y, MATERIAL m)
+{
+    int i, j;
+    for(i = cell_x - 1; i <= cell_x + 1; i++)
+    {
+        for(j = cell_y - 1; j <= cell_y + 1; j++)
+        {
+            world_set_cell(i, j, m);
+        }
+    }
 }
 
 bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
 {
-    if(world[dst_x][dst_y])
+    if(world_get_cell(dst_x, dst_y))
         return false;
 
-    world_set_cell(dst_x, dst_y, world[src_x][src_y]);
+    world_set_cell(dst_x, dst_y, world_get_cell(src_x, src_y));
     world_set_updated(dst_x, dst_y, true);
     world_set_cell(src_x, src_y, Air);
     return true;
@@ -64,29 +107,48 @@ bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
 
 void world_update()
 {
-    int i, j;
+    world_clear_updates();
+
+    int i, j, k, l;
     for(i = 1; i < WORLD_W - 1; i++)
     {
         for(j = 1; j < WORLD_H - 1; j++)
         {
-            if(world_get_updated(i, j)) // get 7th bit
-            {
-                world_set_updated(i, j, false); // clear 7th bit
+            if(world_get_updated(i, j))
                 continue;
-            }
 
-            switch(world[i][j])
+            switch(world_get_cell(i, j))
             {
                 case Sand:
-                    if(world[i][j + 1])
+                    if(world_get_cell(i, j + 1))
                     {
-                        if(!world[i - 1][j + 1])
+                        if(!world_get_cell(i - 1, j + 1))
                             world_move_cell(i, j, i - 1, j + 1);
-                        else if(!world[i + 1][j + 1])
+                        else if(!world_get_cell(i + 1, j + 1))
                             world_move_cell(i, j, i + 1, j + 1);
                     }
                     else
                         world_move_cell(i, j, i, j + 1);
+                    break;
+
+                case Fire:
+                    for(k = i - 1; k <= i + 1; k++)
+                    {
+                        for(l = j - 1; l <= j + 1; l++)
+                        {
+                            if(k == i && l == j)
+                                continue;
+                            if(world_get_cell(k, l) == Wood)
+                            {
+                                world_set_cell(k, l, Fire);
+                                world_set_updated(k, l, true);
+                            }
+                        }
+                    }
+                    world_set_cell(i, j, Air);
+                    break;
+
+                default:
                     break;
             }
         }
@@ -102,13 +164,19 @@ void world_render()
     {
         for(j = 1; j < WORLD_H - 1; j++)
         {
-            switch(world[i][j])
+            switch(world_get_cell(i, j))
             {
                 case Stone:
                     color = al_map_rgb_f(0.5, 0.5, 0.5);
                     break;
                 case Sand:
                     color = al_map_rgb_f(0.7, 0.7, 0.5);
+                    break;
+                case Wood:
+                    color = al_map_rgb_f(0.5, 0.3, 0.2);
+                    break;
+                case Fire:
+                    color = al_map_rgb_f(0.9, 0.3, 0.1);
                     break;
                 default:
                     continue;
@@ -165,6 +233,8 @@ int main()
 
     ALLEGRO_MOUSE_STATE state;
 
+    MATERIAL mat;
+
     al_start_timer(timer);
     while(1)
     {
@@ -174,15 +244,16 @@ int main()
         {
             case ALLEGRO_EVENT_TIMER:
                 al_get_mouse_state(&state);
+                mat = state.z % MaterialCount;
                 if(state.buttons & 1)
-                    world_set_cell(state.x / 4, state.y / 4, Sand);
-
+                    world_paint(state.x / 4, state.y / 4, mat);
+                
                 world_update();
 
                 redraw = true;
                 break;
 
-            case ALLEGRO_EVENT_KEY_DOWN:
+            // case ALLEGRO_EVENT_KEY_DOWN:
             case ALLEGRO_EVENT_DISPLAY_CLOSE:
                 done = true;
                 break;
@@ -195,8 +266,9 @@ int main()
         {
             al_clear_to_color(al_map_rgb(0, 0, 0));
 
-            al_draw_bitmap(mysha, 0, 0, 0);
+            // al_draw_bitmap(mysha, 0, 0, 0);
             world_render();
+            al_draw_text(font, al_map_rgb_f(1.0, 1.0, 1.0), 0, 0, 0, material_name(mat));
             
             al_flip_display();
 
