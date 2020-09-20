@@ -5,7 +5,7 @@ CC=gcc
 CPPFLAGS=-Ilib/allegro/include
 CFLAGS=-Wall -std=c99 -pedantic
 LDFLAGS=-Llib/allegro/lib
-LIBS=-lallegro -lallegro_font
+LIBS=-lallegro -lallegro_font -lallegro_image
 EXEC=$(BIN_DIR)/sablox
 
 all: $(EXEC)
