@@ -53,6 +53,8 @@ void world_paint(int cell_x, int cell_y, MATERIAL m)
     {
         for(j = cell_y - 1; j <= cell_y + 1; j++)
         {
+            if(i != cell_x && j != cell_y)
+                continue;
             world_set_cell(i, j, m);
         }
     }
