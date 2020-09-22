@@ -75,9 +75,14 @@ void world_update()
                 case Sand:
                     if(world_get_cell(i, j + 1))
                     {
-                        if(!world_get_cell(i - 1, j + 1))
+                        MATERIAL free_dl = !world_get_cell(i - 1, j + 1);
+                        MATERIAL free_dr = !world_get_cell(i + 1, j + 1);
+
+                        if(steps % 2 && free_dr)
+                            world_move_cell(i, j, i + 1, j + 1);
+                        else if(free_dl)
                             world_move_cell(i, j, i - 1, j + 1);
-                        else if(!world_get_cell(i + 1, j + 1))
+                        else if(free_dr)
                             world_move_cell(i, j, i + 1, j + 1);
                     }
                     else
