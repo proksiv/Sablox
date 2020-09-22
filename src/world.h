@@ -11,8 +11,7 @@ typedef enum
 void world_init();
 
 bool world_get_updated(int cell_x, int cell_y);
-void world_set_updated(int cell_x, int cell_y, bool b);
-void world_clear_updates();
+void world_set_updated(int cell_x, int cell_y);
 
 MATERIAL world_get_cell(int cell_x, int cell_y);
 void world_set_cell(int cell_x, int cell_y, MATERIAL m);

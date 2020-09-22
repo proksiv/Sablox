@@ -5,6 +5,7 @@
 #include "world.h"
 
 char world[WORLD_W][WORLD_H];
+long steps = 0;
 
 void world_init()
 {
@@ -16,24 +17,12 @@ bool world_get_updated(int cell_x, int cell_y)
     return (world[cell_x][cell_y] >> 7) & 1;
 }
 
-void world_set_updated(int cell_x, int cell_y, bool b)
+void world_set_updated(int cell_x, int cell_y)
 {
-    if(b)
+    if(steps % 2)
         world[cell_x][cell_y] |= (1 << 7);
     else
         world[cell_x][cell_y] &= (~(1 << 7));
-}
-
-void world_clear_updates()
-{
-    int i, j;
-    for(i = 1; i < WORLD_W - 1; i++)
-    {
-        for(j = 1; j < WORLD_H - 1; j++)
-        {
-            world_set_updated(i, j, false);
-        }
-    }
 }
 
 MATERIAL world_get_cell(int cell_x, int cell_y)
@@ -66,21 +55,19 @@ bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
         return false;
 
     world_set_cell(dst_x, dst_y, world_get_cell(src_x, src_y));
-    world_set_updated(dst_x, dst_y, true);
+    world_set_updated(dst_x, dst_y);
     world_set_cell(src_x, src_y, Air);
     return true;
 }
 
 void world_update()
 {
-    world_clear_updates();
-
     int i, j, k, l;
     for(i = 1; i < WORLD_W - 1; i++)
     {
         for(j = 1; j < WORLD_H - 1; j++)
         {
-            if(world_get_updated(i, j))
+            if(world_get_updated(i, j) == (steps % 2))
                 continue;
 
             switch(world_get_cell(i, j))
@@ -107,7 +94,7 @@ void world_update()
                             if(world_get_cell(k, l) == Wood)
                             {
                                 world_set_cell(k, l, Fire);
-                                world_set_updated(k, l, true);
+                                world_set_updated(k, l);
                             }
                         }
                     }
@@ -119,6 +106,8 @@ void world_update()
             }
         }
     }
+
+    steps++;
 }
 
 void world_render()
