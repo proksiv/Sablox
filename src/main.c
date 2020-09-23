@@ -8,25 +8,6 @@
 
 #define ASSETS_DIR "../assets"
 
-const char *material_name(MATERIAL m)
-{
-    switch(m)
-    {
-        case Air:
-            return "Air";
-        case Stone:
-            return "Stone";
-        case Sand:
-            return "Sand";
-        case Wood:
-            return "Wood";
-        case Fire:
-            return "Fire";
-        default:
-            return "Undefined";
-    }
-}
-
 void must_init(bool test, const char *description)
 {
     if(test) return;
@@ -77,7 +58,7 @@ int main()
 
     ALLEGRO_MOUSE_STATE state;
 
-    MATERIAL mat;
+    MATERIAL mat = Air;
 
     al_start_timer(timer);
     while(1)
@@ -112,7 +93,9 @@ int main()
 
             // al_draw_bitmap(mysha, 0, 0, 0);
             world_render();
-            al_draw_text(font, al_map_rgb_f(1.0, 1.0, 1.0), 0, 0, 0, material_name(mat));
+
+            const char *m_name = material_get_data(mat).name;
+            al_draw_text(font, al_map_rgb_f(1.0, 1.0, 1.0), 0, 0, 0, m_name);
             
             al_flip_display();
 

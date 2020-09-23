@@ -5,11 +5,12 @@
 #include "world.h"
 
 char world[WORLD_W][WORLD_H];
-long steps = 0;
 
 void world_init()
 {
+    materials_init();
     memset(world, Air, WORLD_W*WORLD_H);
+    steps = 0;
 }
 
 bool world_get_updated(int cell_x, int cell_y)
@@ -62,7 +63,9 @@ bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
 
 void world_update()
 {
-    int i, j, k, l;
+    void (*update_routine)(int, int);
+
+    int i, j;
     for(i = 1; i < WORLD_W - 1; i++)
     {
         for(j = 1; j < WORLD_H - 1; j++)
@@ -70,45 +73,9 @@ void world_update()
             if(world_get_updated(i, j) == (steps % 2))
                 continue;
 
-            switch(world_get_cell(i, j))
-            {
-                case Sand:
-                    if(world_get_cell(i, j + 1))
-                    {
-                        MATERIAL free_dl = !world_get_cell(i - 1, j + 1);
-                        MATERIAL free_dr = !world_get_cell(i + 1, j + 1);
-
-                        if(steps % 2 && free_dr)
-                            world_move_cell(i, j, i + 1, j + 1);
-                        else if(free_dl)
-                            world_move_cell(i, j, i - 1, j + 1);
-                        else if(free_dr)
-                            world_move_cell(i, j, i + 1, j + 1);
-                    }
-                    else
-                        world_move_cell(i, j, i, j + 1);
-                    break;
-
-                case Fire:
-                    for(k = i - 1; k <= i + 1; k++)
-                    {
-                        for(l = j - 1; l <= j + 1; l++)
-                        {
-                            if(k == i && l == j)
-                                continue;
-                            if(world_get_cell(k, l) == Wood)
-                            {
-                                world_set_cell(k, l, Fire);
-                                world_set_updated(k, l);
-                            }
-                        }
-                    }
-                    world_set_cell(i, j, Air);
-                    break;
-
-                default:
-                    break;
-            }
+            update_routine = material_get_data(world_get_cell(i, j)).update_routine;
+            if (update_routine != NULL)
+                update_routine(i, j);
         }
     }
 
@@ -124,23 +91,11 @@ void world_render()
     {
         for(j = 1; j < WORLD_H - 1; j++)
         {
-            switch(world_get_cell(i, j))
-            {
-                case Stone:
-                    color = al_map_rgb_f(0.5, 0.5, 0.5);
-                    break;
-                case Sand:
-                    color = al_map_rgb_f(0.7, 0.7, 0.5);
-                    break;
-                case Wood:
-                    color = al_map_rgb_f(0.5, 0.3, 0.2);
-                    break;
-                case Fire:
-                    color = al_map_rgb_f(0.9, 0.3, 0.1);
-                    break;
-                default:
-                    continue;
-            }
+            color = material_get_data(world_get_cell(i, j)).color;
+            unsigned char r, g, b;
+            al_unmap_rgb(color, &r, &g, &b);
+            if(r == 0 && g == 0 && b == 0)
+                continue;
 
             float x1 = (i - 1)*4;
             float y1 = (j - 1)*4;

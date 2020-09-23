@@ -1,12 +1,11 @@
 #pragma once
 
+#include "materials.h"
+
 #define WORLD_W 162
 #define WORLD_H 122
 
-typedef enum
-{
-    Air, Stone, Sand, Wood, Fire, MaterialCount
-} MATERIAL;
+long steps;
 
 void world_init();
 
