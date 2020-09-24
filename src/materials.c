@@ -16,6 +16,8 @@ void material_update_sand(int x, int y)
             world_move_cell(x, y, x - 1, y + 1);
         else if(free_dr)
             world_move_cell(x, y, x + 1, y + 1);
+        else
+            world_set_static(x, y, true);
     }
     else
         world_move_cell(x, y, x, y + 1);

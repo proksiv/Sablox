@@ -26,14 +26,36 @@ void world_set_updated(int cell_x, int cell_y)
         world[cell_x][cell_y] &= (~(1 << 7));
 }
 
+bool world_get_static(int cell_x, int cell_y)
+{
+    return (world[cell_x][cell_y] >> 6) & 1;
+}
+
+void world_set_static(int cell_x, int cell_y, bool is_static)
+{
+    if(is_static)
+        world[cell_x][cell_y] |= (1 << 6);
+    else
+        world[cell_x][cell_y] &= (~(1 << 6));
+}
+
 MATERIAL world_get_cell(int cell_x, int cell_y)
 {
-    return (world[cell_x][cell_y] & 127);
+    return (world[cell_x][cell_y] & 63);
 }
 
 void world_set_cell(int cell_x, int cell_y, MATERIAL m)
 {
-    world[cell_x][cell_y] = (world_get_updated(cell_x, cell_y) << 7) | m;
+    world[cell_x][cell_y] = (world_get_updated(cell_x, cell_y) << 7) | (world_get_static(cell_x, cell_y) << 6) | m;
+
+    int i, j;
+    for(i = cell_x - 1; i <= cell_x; i++)
+    {
+        for(j = cell_y - 1; j <= cell_y; j++)
+        {
+            world_set_static(i, j, false);
+        }
+    }
 }
 
 void world_paint(int cell_x, int cell_y, MATERIAL m)
@@ -70,12 +92,14 @@ void world_update()
     {
         for(j = 1; j < WORLD_H - 1; j++)
         {
-            if(world_get_updated(i, j) == (steps % 2))
+            if(world_get_static(i, j) || world_get_updated(i, j) == (steps % 2))
                 continue;
 
             update_routine = material_get_data(world_get_cell(i, j)).update_routine;
             if (update_routine != NULL)
                 update_routine(i, j);
+            else
+                world_set_static(i, j, true);
         }
     }
 
