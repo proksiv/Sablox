@@ -13,7 +13,15 @@ OBJ=$(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 all: $(EXEC)
 
 $(EXEC): $(OBJ)
-	$(CC) -o $@ $^ $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LIBS)
+	@$(CC) -o $@ $^ $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LIBS)
 
 $(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) -o $@ -c $< $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LIBS)
+	@$(CC) -o $@ -c $< $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LIBS)
+
+.PHONY: clean mrproper
+
+clean:
+	@rm -rf $(OBJ_DIR)/*.o
+
+mrproper: clean
+	@rm -rf $(EXEC)
