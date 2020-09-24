@@ -54,6 +54,7 @@ int main()
 
     bool done = false;
     bool redraw = true;
+    bool paused = false;
     ALLEGRO_EVENT event;
 
     ALLEGRO_MOUSE_STATE state;
@@ -73,12 +74,17 @@ int main()
                 if(state.buttons & 1)
                     world_paint(state.x / 4, state.y / 4, mat);
                 
-                world_update();
+                if(!paused)
+                    world_update();
 
                 redraw = true;
                 break;
 
-            // case ALLEGRO_EVENT_KEY_DOWN:
+            case ALLEGRO_EVENT_KEY_DOWN:
+                if(event.keyboard.keycode == ALLEGRO_KEY_SPACE)
+                    paused = !paused;
+                break;
+
             case ALLEGRO_EVENT_DISPLAY_CLOSE:
                 done = true;
                 break;
@@ -96,6 +102,9 @@ int main()
 
             const char *m_name = material_get_data(mat).name;
             al_draw_text(font, al_map_rgb_f(1.0, 1.0, 1.0), 0, 0, 0, m_name);
+
+            if(paused)
+                al_draw_text(font, al_map_rgb_f(1.0, 1.0, 1.0), 0, 16, 0, "<Paused>");
             
             al_flip_display();
 
