@@ -31,11 +31,11 @@ void world_init()
         v[0].y = v[1].y = v[5].y = cell_y*CELL_SIZE;
         v[1].x = v[4].x = v[5].x = cell_x*CELL_SIZE + CELL_SIZE;
         v[2].y = v[3].y = v[4].y = cell_y*CELL_SIZE + CELL_SIZE;
+        v[0].z = v[1].z = v[2].z = v[3].z = v[4].z = v[5].z = 0;
         v[0].color = v[1].color = v[2].color = v[3].color = v[4].color = v[5].color = material_get_data(m).color;
-        
     }
 
-    vbuf = al_create_vertex_buffer(NULL, varray, CELLS_TO_RENDER*6, ALLEGRO_PRIM_TRIANGLE_LIST);
+    vbuf = al_create_vertex_buffer(NULL, varray, CELLS_TO_RENDER*6, ALLEGRO_PRIM_BUFFER_STREAM);
 }
 
 bool world_get_updated(int cell_x, int cell_y)
@@ -142,5 +142,5 @@ void world_update()
 
 void world_render()
 {
-    al_draw_vertex_buffer(vbuf, NULL, 0, CELLS_TO_RENDER*6, ALLEGRO_PRIM_BUFFER_DYNAMIC);
+    al_draw_vertex_buffer(vbuf, NULL, 0, CELLS_TO_RENDER*6, ALLEGRO_PRIM_TRIANGLE_LIST);
 }
