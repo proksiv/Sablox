@@ -4,9 +4,9 @@
 
 #include "world.h"
 
-#define CELLS_NUMBER WORLD_W*WORLD_H
 #define CELLS_TO_RENDER (WORLD_W - 2)*(WORLD_H - 2)
-#define CELL_SIZE 4
+const int CELL_SIZE = 4;
+const int RENDER_H = WORLD_H - 2;
 
 char world[WORLD_W][WORLD_H];
 
@@ -18,20 +18,21 @@ void world_init()
     MATERIAL m = Air;
 
     materials_init();
-    memset(world, m, CELLS_NUMBER);
+    memset(world, m, WORLD_W*WORLD_H);
     steps = 0;
     
     int i, cell_x, cell_y;
     for(i = 0; i < CELLS_TO_RENDER; i++)
     {
-        cell_x = i/WORLD_H;
-        cell_y = i%WORLD_H;
+        cell_x = i/RENDER_H;
+        cell_y = i%RENDER_H;
         ALLEGRO_VERTEX* v = &varray[i*6];
         v[0].x = v[2].x = v[3].x = cell_x*CELL_SIZE;
         v[0].y = v[1].y = v[5].y = cell_y*CELL_SIZE;
         v[1].x = v[4].x = v[5].x = cell_x*CELL_SIZE + CELL_SIZE;
         v[2].y = v[3].y = v[4].y = cell_y*CELL_SIZE + CELL_SIZE;
         v[0].color = v[1].color = v[2].color = v[3].color = v[4].color = v[5].color = material_get_data(m).color;
+        
     }
 
     vbuf = al_create_vertex_buffer(NULL, varray, CELLS_TO_RENDER*6, ALLEGRO_PRIM_TRIANGLE_LIST);
@@ -81,10 +82,10 @@ void world_set_cell(int cell_x, int cell_y, MATERIAL m)
         }
     }
 
-    if (cell_x == 0 || cell_y == 0 || cell_x == WORLD_W - 1 || cell_y == WORLD_H - 1)
+    if (cell_x <= 0 || cell_y <= 0 || cell_x >= WORLD_W - 1 || cell_y >= WORLD_H - 1)
         return;
 
-    int index = (--cell_x*WORLD_H + --cell_y)*6;
+    int index = (--cell_x*RENDER_H + --cell_y)*6;
     void* lock_mem = al_lock_vertex_buffer(vbuf, index, 6, ALLEGRO_LOCK_WRITEONLY);
     varray[index].color = varray[index + 1].color = varray[index + 2].color = varray[index + 3].color = varray[index + 4].color = varray[index + 5].color = material_get_data(m).color;
     memcpy(lock_mem, varray + index, sizeof(ALLEGRO_VERTEX)*6);
