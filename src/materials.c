@@ -49,7 +49,7 @@ void materials_init()
 
     data.name = "Air";
     data.update_routine = NULL;
-    data.color = al_map_rgb_f(0.0, 0.0, 0.0);
+    data.color = al_map_rgba_f(0.0, 0.0, 0.0, 0.0);
     materials_data[Air] = data;
 
     data.name = "Stone";

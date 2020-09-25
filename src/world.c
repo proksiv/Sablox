@@ -4,13 +4,36 @@
 
 #include "world.h"
 
+#define CELLS_NUMBER WORLD_W*WORLD_H
+#define CELL_SIZE 4
+
 char world[WORLD_W][WORLD_H];
+
+ALLEGRO_VERTEX varray[CELLS_NUMBER*6];
+ALLEGRO_VERTEX_BUFFER* vbuf;
 
 void world_init()
 {
+    MATERIAL m = Air;
+
     materials_init();
-    memset(world, Air, WORLD_W*WORLD_H);
+    memset(world, m, CELLS_NUMBER);
     steps = 0;
+    
+    int i, cell_x, cell_y;
+    for(i = 0; i < CELLS_NUMBER; i++)
+    {
+        cell_x = i/WORLD_H;
+        cell_y = i%WORLD_H;
+        ALLEGRO_VERTEX* v = &varray[i*6];
+        v[0].x = v[2].x = v[3].x = cell_x*CELL_SIZE - CELL_SIZE;
+        v[0].y = v[1].y = v[5].y = cell_y*CELL_SIZE - CELL_SIZE;
+        v[1].x = v[4].x = v[5].x = cell_x*CELL_SIZE;
+        v[2].y = v[3].y = v[4].y = cell_y*CELL_SIZE;
+        v[0].color = v[1].color = v[2].color = v[3].color = v[4].color = v[5].color = material_get_data(m).color;
+    }
+
+    vbuf = al_create_vertex_buffer(NULL, varray, CELLS_NUMBER*6, ALLEGRO_PRIM_TRIANGLE_LIST);
 }
 
 bool world_get_updated(int cell_x, int cell_y)
@@ -56,6 +79,12 @@ void world_set_cell(int cell_x, int cell_y, MATERIAL m)
             world_set_static(i, j, false);
         }
     }
+
+    int index = (cell_x*WORLD_H + cell_y)*6;
+    void* lock_mem = al_lock_vertex_buffer(vbuf, index, 6, ALLEGRO_LOCK_WRITEONLY);
+    varray[index].color = varray[index + 1].color = varray[index + 2].color = varray[index + 3].color = varray[index + 4].color = varray[index + 5].color = material_get_data(m).color;
+    memcpy(lock_mem, varray + index, sizeof(ALLEGRO_VERTEX)*6);
+    al_unlock_vertex_buffer(vbuf);
 }
 
 void world_paint(int cell_x, int cell_y, MATERIAL m)
@@ -108,24 +137,5 @@ void world_update()
 
 void world_render()
 {
-    ALLEGRO_COLOR color;
-
-    int i, j;
-    for(i = 1; i < WORLD_W - 1; i++)
-    {
-        for(j = 1; j < WORLD_H - 1; j++)
-        {
-            color = material_get_data(world_get_cell(i, j)).color;
-            unsigned char r, g, b;
-            al_unmap_rgb(color, &r, &g, &b);
-            if(r == 0 && g == 0 && b == 0)
-                continue;
-
-            float x1 = (i - 1)*4;
-            float y1 = (j - 1)*4;
-            float x2 = x1 + 4;
-            float y2 = y1 + 4;
-            al_draw_filled_rectangle(x1, y1, x2, y2, color);
-        }
-    }
+    al_draw_vertex_buffer(vbuf, NULL, 0, CELLS_NUMBER*6, ALLEGRO_PRIM_BUFFER_DYNAMIC);
 }

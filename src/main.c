@@ -100,7 +100,7 @@ int main()
             // al_draw_bitmap(mysha, 0, 0, 0);
             world_render();
 
-            const char *m_name = material_get_data(mat).name;
+            const char* m_name = material_get_data(mat).name;
             al_draw_text(font, al_map_rgb_f(1.0, 1.0, 1.0), 0, 0, 0, m_name);
 
             if(paused)
