@@ -12,9 +12,6 @@ void world_init();
 bool world_get_updated(int cell_x, int cell_y);
 void world_set_updated(int cell_x, int cell_y);
 
-bool world_get_static(int cell_x, int cell_y);
-void world_set_static(int cell_x, int cell_y, bool is_static);
-
 MATERIAL world_get_cell(int cell_x, int cell_y);
 void world_set_cell(int cell_x, int cell_y, MATERIAL m);
 bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y);
