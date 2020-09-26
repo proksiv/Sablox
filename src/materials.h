@@ -4,7 +4,7 @@
 
 typedef enum
 {
-    Air, Stone, Sand, Wood, Fire, MaterialCount
+    Air, Stone, Sand, Wood, Fire, Water, MaterialCount
 } MATERIAL;
 
 typedef struct
@@ -16,6 +16,7 @@ typedef struct
 
 void material_update_sand();
 void material_update_fire();
+void material_update_water();
 
 void materials_init();
 

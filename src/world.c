@@ -94,6 +94,9 @@ void world_set_cell(int cell_x, int cell_y, MATERIAL m)
 
 void world_paint(int cell_x, int cell_y, MATERIAL m)
 {
+    if (cell_x < 0 || cell_y < 0 || cell_x >= WORLD_W || cell_y >= WORLD_H)
+        return;
+
     int i, j;
     for(i = cell_x - 1; i <= cell_x + 1; i++)
     {

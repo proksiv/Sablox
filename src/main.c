@@ -7,6 +7,8 @@
 #include "world.h"
 
 #define ASSETS_DIR "../assets"
+#define WINDOW_W 640
+#define WINDOW_H 480
 
 void must_init(bool test, const char *description)
 {
@@ -28,7 +30,7 @@ int main()
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     must_init(queue, "queue");
 
-    ALLEGRO_DISPLAY* disp = al_create_display(640, 480);
+    ALLEGRO_DISPLAY* disp = al_create_display(WINDOW_W, WINDOW_H);
     must_init(disp, "display");
 
     ALLEGRO_FONT* font = al_create_builtin_font();

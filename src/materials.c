@@ -43,6 +43,32 @@ void material_update_fire(int x, int y)
     world_set_cell(x, y, Air);
 }
 
+void material_update_water(int x, int y)
+{
+    if(world_get_cell(x, y + 1))
+    {
+        MATERIAL free_dl = !world_get_cell(x - 1, y + 1);
+        MATERIAL free_dr = !world_get_cell(x + 1, y + 1);
+        MATERIAL free_l = !world_get_cell(x - 1, y);
+        MATERIAL free_r = !world_get_cell(x + 1, y);
+
+        if(steps % 2 && free_dr)
+            world_move_cell(x, y, x + 1, y + 1);
+        else if(free_dl)
+            world_move_cell(x, y, x - 1, y + 1);
+        else if(free_dr)
+            world_move_cell(x, y, x + 1, y + 1);
+        else if(steps % 2 && free_r && !free_l)
+            world_move_cell(x, y, x + 1, y);
+        else if (free_l && !free_r)
+            world_move_cell(x, y, x - 1, y);
+        else if (free_r && !free_l)
+            world_move_cell(x, y, x + 1, y);
+    }
+    else
+        world_move_cell(x, y, x, y + 1);
+}
+
 void materials_init()
 {
     MATERIAL_DATA data;
@@ -71,6 +97,11 @@ void materials_init()
     data.update_routine = &material_update_fire;
     data.color = al_map_rgb_f(0.9, 0.3, 0.1);
     materials_data[Fire] = data;
+
+    data.name = "Water";
+    data.update_routine = &material_update_water;
+    data.color = al_map_rgb_f(0.1, 0.5, 0.9);
+    materials_data[Water] = data;
 }
 
 MATERIAL_DATA material_get_data(MATERIAL m)
