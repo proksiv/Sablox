@@ -3,6 +3,14 @@
 
 MATERIAL_DATA materials_data[MaterialCount];
 
+void material_check_density(int x, int y)
+{
+    MATERIAL_DATA self = material_get_data(world_get_cell(x, y));
+    MATERIAL_DATA below = material_get_data(world_get_cell(x, y + 1));
+    if(below.density > 0 && self.density > below.density)
+        world_swap(x, y, x, y + 1);
+}
+
 void material_update_sand(int x, int y)
 {
     if(world_get_cell(x, y + 1))
@@ -74,31 +82,37 @@ void materials_init()
     data.name = "Air";
     data.update_routine = NULL;
     data.color = al_map_rgba_f(0.0, 0.0, 0.0, 0.0);
+    data.density = 0;
     materials_data[Air] = data;
 
     data.name = "Stone";
     data.update_routine = NULL;
     data.color = al_map_rgb_f(0.5, 0.5, 0.5);
+    data.density = 0;
     materials_data[Stone] = data;
 
     data.name = "Sand";
     data.update_routine = &material_update_sand;
     data.color = al_map_rgb_f(0.7, 0.7, 0.5);
+    data.density = 1442;
     materials_data[Sand] = data;
 
     data.name = "Wood";
     data.update_routine = NULL;
     data.color = al_map_rgb_f(0.5, 0.3, 0.2);
+    data.density = 0;
     materials_data[Wood] = data;
 
     data.name = "Fire";
     data.update_routine = &material_update_fire;
     data.color = al_map_rgb_f(0.9, 0.3, 0.1);
+    data.density = 0;
     materials_data[Fire] = data;
 
     data.name = "Water";
     data.update_routine = &material_update_water;
     data.color = al_map_rgb_f(0.1, 0.5, 0.9);
+    data.density = 1000;
     materials_data[Water] = data;
 }
 

@@ -70,6 +70,26 @@ void world_set_cell(int cell_x, int cell_y, MATERIAL m)
     al_unlock_vertex_buffer(vbuf);
 }
 
+bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
+{
+    if(world_get_cell(dst_x, dst_y))
+        return false;
+
+    world_set_cell(dst_x, dst_y, world_get_cell(src_x, src_y));
+    world_set_updated(dst_x, dst_y);
+    world_set_cell(src_x, src_y, Air);
+    return true;
+}
+
+void world_swap(int ax, int ay, int bx, int by)
+{
+    MATERIAL temp = world_get_cell(ax, ay);
+    world_set_cell(ax, ay, world_get_cell(bx, by));
+    world_set_cell(bx, by, temp);
+    world_set_updated(ax, ay);
+    world_set_updated(bx, by);
+}
+
 void world_paint(int cell_x, int cell_y, MATERIAL m)
 {
     if (cell_x < 0 || cell_y < 0 || cell_x >= WORLD_W || cell_y >= WORLD_H)
@@ -87,17 +107,6 @@ void world_paint(int cell_x, int cell_y, MATERIAL m)
     }
 }
 
-bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
-{
-    if(world_get_cell(dst_x, dst_y))
-        return false;
-
-    world_set_cell(dst_x, dst_y, world_get_cell(src_x, src_y));
-    world_set_updated(dst_x, dst_y);
-    world_set_cell(src_x, src_y, Air);
-    return true;
-}
-
 void world_update()
 {
     void (*update_routine)(int, int);
@@ -113,6 +122,8 @@ void world_update()
             update_routine = material_get_data(world_get_cell(i, j)).update_routine;
             if (update_routine != NULL)
                 update_routine(i, j);
+            
+            material_check_density(i, j);
         }
     }
 
