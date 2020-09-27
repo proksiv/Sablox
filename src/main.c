@@ -73,6 +73,7 @@ int main()
             case ALLEGRO_EVENT_TIMER:
                 al_get_mouse_state(&state);
                 mat = state.z % MaterialCount;
+
                 if(state.buttons & 1)
                     world_paint(state.x/4 + 1, state.y/4 + 1, mat);
                 

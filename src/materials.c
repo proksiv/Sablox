@@ -75,6 +75,32 @@ void material_update_water(int x, int y)
         world_move_cell(x, y, x, y + 1);
 }
 
+void material_update_acid(int x, int y)
+{
+    int k, l;
+    bool consumed = false;
+
+    for(k = x - 1; k <= x + 1; k++)
+    {
+        for(l = y; l <= y + 1; l++)
+        {
+            if(k == x && l == y)
+                continue;
+            MATERIAL target = world_get_cell(k, l);
+            if(target != Acid && target != Air)
+            {
+                world_set_cell(k, l, Air);
+                world_set_updated(k, l);
+                consumed = true;
+            }
+        }
+    }
+    if(consumed)
+        world_set_cell(x, y, Air);
+
+    material_update_water(x, y);
+}
+
 void materials_init()
 {
     MATERIAL_DATA data;
@@ -114,6 +140,12 @@ void materials_init()
     data.color = al_map_rgb_f(0.1, 0.5, 0.9);
     data.density = 1000;
     materials_data[Water] = data;
+
+    data.name = "Acid";
+    data.update_routine = &material_update_acid;
+    data.color = al_map_rgb_f(0.7, 0.8, 0.1);
+    data.density = 1200;
+    materials_data[Acid] = data;
 }
 
 MATERIAL_DATA material_get_data(MATERIAL m)
