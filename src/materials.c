@@ -46,7 +46,7 @@ void material_update_fire(int x, int y)
             }
         }
     }
-    world_set_cell(x, y, Air);
+    world_set_cell(x, y, Smoke);
 }
 
 void material_update_water(int x, int y)
@@ -101,6 +101,24 @@ void material_update_acid(int x, int y)
     material_update_water(x, y);
 }
 
+void material_update_smoke(int x, int y)
+{
+    if(world_get_cell(x, y - 1))
+    {
+        MATERIAL free_ul = !world_get_cell(x - 1, y - 1);
+        MATERIAL free_ur = !world_get_cell(x + 1, y - 1);
+
+        if(steps % 2 && free_ur)
+            world_move_cell(x, y, x + 1, y - 1);
+        else if(free_ul)
+            world_move_cell(x, y, x - 1, y - 1);
+        else if(free_ur)
+            world_move_cell(x, y, x + 1, y - 1);
+    }
+    else
+        world_move_cell(x, y, x, y - 1);
+}
+
 void materials_init()
 {
     MATERIAL_DATA data;
@@ -146,6 +164,12 @@ void materials_init()
     data.color = al_map_rgb_f(0.7, 0.8, 0.1);
     data.density = 1200;
     materials_data[Acid] = data;
+
+    data.name = "Smoke";
+    data.update_routine = &material_update_smoke;
+    data.color = al_map_rgb_f(0.3, 0.3, 0.3);
+    data.density = 1;
+    materials_data[Smoke] = data;
 }
 
 MATERIAL_DATA material_get_data(MATERIAL m)
