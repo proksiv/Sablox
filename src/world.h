@@ -5,18 +5,21 @@
 #define WORLD_W 162
 #define WORLD_H 122
 
+typedef unsigned char lifetime_t;
+
 long steps;
 
 void world_init();
 
-bool world_get_updated(int cell_x, int cell_y);
-void world_set_updated(int cell_x, int cell_y);
+bool world_get_cell_updated(int cell_x, int cell_y);
+void world_set_cell_updated(int cell_x, int cell_y);
+MATERIAL world_get_cell_material(int cell_x, int cell_y);
+void world_set_cell_material(int cell_x, int cell_y, MATERIAL m);
+lifetime_t world_get_cell_lifetime(int cell_x, int cell_y);
+void world_set_cell_lifetime(int cell_x, int cell_y, lifetime_t lifetime);
 
-MATERIAL world_get_cell(int cell_x, int cell_y);
-void world_set_cell(int cell_x, int cell_y, MATERIAL m);
 bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y);
-void world_swap(int ax, int ay, int bx, int by);
-
+void world_swap_cells(int ax, int ay, int bx, int by);
 void world_paint(int cell_x, int cell_y, MATERIAL m);
 
 void world_update();

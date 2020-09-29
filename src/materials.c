@@ -5,18 +5,18 @@ MATERIAL_DATA materials_data[MaterialCount];
 
 void material_check_density(int x, int y)
 {
-    MATERIAL_DATA self = material_get_data(world_get_cell(x, y));
-    MATERIAL_DATA below = material_get_data(world_get_cell(x, y + 1));
+    MATERIAL_DATA self = material_get_data(world_get_cell_material(x, y));
+    MATERIAL_DATA below = material_get_data(world_get_cell_material(x, y + 1));
     if(below.density > 0 && self.density > below.density)
-        world_swap(x, y, x, y + 1);
+        world_swap_cells(x, y, x, y + 1);
 }
 
 void material_update_sand(int x, int y)
 {
-    if(world_get_cell(x, y + 1))
+    if(world_get_cell_material(x, y + 1))
     {
-        MATERIAL free_dl = !world_get_cell(x - 1, y + 1);
-        MATERIAL free_dr = !world_get_cell(x + 1, y + 1);
+        MATERIAL free_dl = !world_get_cell_material(x - 1, y + 1);
+        MATERIAL free_dr = !world_get_cell_material(x + 1, y + 1);
 
         if(steps % 2 && free_dr)
             world_move_cell(x, y, x + 1, y + 1);
@@ -39,24 +39,24 @@ void material_update_fire(int x, int y)
         {
             if(k == x && l == y)
                 continue;
-            if(world_get_cell(k, l) == Wood)
+            if(world_get_cell_material(k, l) == Wood)
             {
-                world_set_cell(k, l, Fire);
-                world_set_updated(k, l);
+                world_set_cell_material(k, l, Fire);
+                world_set_cell_updated(k, l);
             }
         }
     }
-    world_set_cell(x, y, Smoke);
+    world_set_cell_material(x, y, Smoke);
 }
 
 void material_update_water(int x, int y)
 {
-    if(world_get_cell(x, y + 1))
+    if(world_get_cell_material(x, y + 1))
     {
-        MATERIAL free_dl = !world_get_cell(x - 1, y + 1);
-        MATERIAL free_dr = !world_get_cell(x + 1, y + 1);
-        MATERIAL free_l = !world_get_cell(x - 1, y);
-        MATERIAL free_r = !world_get_cell(x + 1, y);
+        MATERIAL free_dl = !world_get_cell_material(x - 1, y + 1);
+        MATERIAL free_dr = !world_get_cell_material(x + 1, y + 1);
+        MATERIAL free_l = !world_get_cell_material(x - 1, y);
+        MATERIAL free_r = !world_get_cell_material(x + 1, y);
 
         if(steps % 2 && free_dr)
             world_move_cell(x, y, x + 1, y + 1);
@@ -86,27 +86,27 @@ void material_update_acid(int x, int y)
         {
             if(k == x && l == y)
                 continue;
-            MATERIAL target = world_get_cell(k, l);
+            MATERIAL target = world_get_cell_material(k, l);
             if(target != Acid && target != Air)
             {
-                world_set_cell(k, l, Air);
-                world_set_updated(k, l);
+                world_set_cell_material(k, l, Air);
+                world_set_cell_updated(k, l);
                 consumed = true;
             }
         }
     }
     if(consumed)
-        world_set_cell(x, y, Air);
+        world_set_cell_material(x, y, Air);
 
     material_update_water(x, y);
 }
 
 void material_update_smoke(int x, int y)
 {
-    if(world_get_cell(x, y - 1))
+    if(world_get_cell_material(x, y - 1))
     {
-        MATERIAL free_ul = !world_get_cell(x - 1, y - 1);
-        MATERIAL free_ur = !world_get_cell(x + 1, y - 1);
+        MATERIAL free_ul = !world_get_cell_material(x - 1, y - 1);
+        MATERIAL free_ur = !world_get_cell_material(x + 1, y - 1);
 
         if(steps % 2 && free_ur)
             world_move_cell(x, y, x + 1, y - 1);
