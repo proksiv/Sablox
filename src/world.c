@@ -19,6 +19,8 @@ CELL world[WORLD_W][WORLD_H];
 ALLEGRO_VERTEX varray[CELLS_TO_RENDER*6];
 ALLEGRO_VERTEX_BUFFER* vbuf;
 
+/* Private functions */
+
 void world_redraw_cell(int cell_x, int cell_y)
 {
     if (cell_x <= 0 || cell_y <= 0 || cell_x >= WORLD_W - 1 || cell_y >= WORLD_H - 1)
@@ -31,6 +33,16 @@ void world_redraw_cell(int cell_x, int cell_y)
     memcpy(lock_mem, varray + index, sizeof(ALLEGRO_VERTEX)*6);
     al_unlock_vertex_buffer(vbuf);
 }
+
+void world_check_cell_lifetime(int cell_x, int cell_y)
+{
+    CELL* cell = &(world[cell_x][cell_y]);
+    cell->lifetime--;
+    if(cell->lifetime == 0)
+        world_set_cell_material(cell_x, cell_y, Air);
+}
+
+/* Public functions */
 
 void world_init()
 {
@@ -76,6 +88,7 @@ MATERIAL world_get_cell_material(int cell_x, int cell_y)
 void world_set_cell_material(int cell_x, int cell_y, MATERIAL m)
 {
     world[cell_x][cell_y].m = (world_get_cell_updated(cell_x, cell_y) << 7) | m;
+    world_set_cell_lifetime(cell_x, cell_y, material_get_data(m).initial_lifetime);
     world_redraw_cell(cell_x, cell_y);
 }
 
@@ -133,8 +146,6 @@ void world_paint(int cell_x, int cell_y, MATERIAL m)
 
 void world_update()
 {
-    void (*update_routine)(int, int);
-
     int i, j;
     for(i = 1; i < WORLD_W - 1; i++)
     {
@@ -143,9 +154,13 @@ void world_update()
             if(world_get_cell_updated(i, j) == (steps % 2))
                 continue;
 
-            update_routine = material_get_data(world_get_cell_material(i, j)).update_routine;
-            if (update_routine != NULL)
-                update_routine(i, j);
+            MATERIAL_DATA data = material_get_data(world_get_cell_material(i, j));
+
+            if(data.initial_lifetime > 0)
+                world_check_cell_lifetime(i, j);
+
+            if(data.update_routine != NULL)
+                data.update_routine(i, j);
             
             material_check_density(i, j);
         }

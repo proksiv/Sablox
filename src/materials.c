@@ -127,48 +127,56 @@ void materials_init()
     data.update_routine = NULL;
     data.color = al_map_rgba_f(0.0, 0.0, 0.0, 0.0);
     data.density = 0;
+    data.initial_lifetime = 0;
     materials_data[Air] = data;
 
     data.name = "Stone";
     data.update_routine = NULL;
     data.color = al_map_rgb_f(0.5, 0.5, 0.5);
     data.density = 0;
+    data.initial_lifetime = 0;
     materials_data[Stone] = data;
 
     data.name = "Sand";
     data.update_routine = &material_update_sand;
     data.color = al_map_rgb_f(0.7, 0.7, 0.5);
     data.density = 1442;
+    data.initial_lifetime = 0;
     materials_data[Sand] = data;
 
     data.name = "Wood";
     data.update_routine = NULL;
     data.color = al_map_rgb_f(0.5, 0.3, 0.2);
     data.density = 0;
+    data.initial_lifetime = 0;
     materials_data[Wood] = data;
 
     data.name = "Fire";
     data.update_routine = &material_update_fire;
     data.color = al_map_rgb_f(0.9, 0.3, 0.1);
     data.density = 0;
+    data.initial_lifetime = 0;
     materials_data[Fire] = data;
 
     data.name = "Water";
     data.update_routine = &material_update_water;
     data.color = al_map_rgb_f(0.1, 0.5, 0.9);
     data.density = 1000;
+    data.initial_lifetime = 0;
     materials_data[Water] = data;
 
     data.name = "Acid";
     data.update_routine = &material_update_acid;
     data.color = al_map_rgb_f(0.7, 0.8, 0.1);
     data.density = 1200;
+    data.initial_lifetime = 0;
     materials_data[Acid] = data;
 
     data.name = "Smoke";
     data.update_routine = &material_update_smoke;
     data.color = al_map_rgb_f(0.3, 0.3, 0.3);
     data.density = 1;
+    data.initial_lifetime = 255;
     materials_data[Smoke] = data;
 }
 

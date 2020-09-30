@@ -2,6 +2,8 @@
 
 #include <allegro5/allegro5.h>
 
+typedef unsigned char lifetime_t;
+
 typedef enum
 {
     Air, Stone, Sand, Wood, Fire, Water, Acid, Smoke, MaterialCount
@@ -13,15 +15,10 @@ typedef struct
     void (*update_routine)(int, int);
     ALLEGRO_COLOR color;
     unsigned int density;
+    lifetime_t initial_lifetime;
 } MATERIAL_DATA;
 
 void material_check_density(int x, int y);
-
-void material_update_sand(int x, int y);
-void material_update_fire(int x, int y);
-void material_update_water(int x, int y);
-void material_update_acid(int x, int y);
-void material_update_smoke(int x, int y);
 
 void materials_init();
 

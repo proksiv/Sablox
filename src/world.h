@@ -5,8 +5,6 @@
 #define WORLD_W 162
 #define WORLD_H 122
 
-typedef unsigned char lifetime_t;
-
 long steps;
 
 void world_init();
