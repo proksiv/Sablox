@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
@@ -20,6 +21,8 @@ void must_init(bool test, const char *description)
 
 int main()
 {
+    srand(time(NULL));
+
     must_init(al_init(), "allegro");
     must_init(al_install_keyboard(), "keyboard");
     must_init(al_install_mouse(), "mouse");

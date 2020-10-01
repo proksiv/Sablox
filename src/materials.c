@@ -18,7 +18,7 @@ void material_update_sand(int x, int y)
         MATERIAL free_dl = !world_get_cell_material(x - 1, y + 1);
         MATERIAL free_dr = !world_get_cell_material(x + 1, y + 1);
 
-        if(steps % 2 && free_dr)
+        if(rand() % 2 && free_dr)
             world_move_cell(x, y, x + 1, y + 1);
         else if(free_dl)
             world_move_cell(x, y, x - 1, y + 1);
@@ -41,12 +41,13 @@ void material_update_fire(int x, int y)
                 continue;
             if(world_get_cell_material(k, l) == Wood)
             {
-                world_set_cell_material(k, l, Fire);
+                world_set_cell_material(k, l, Ember);
                 world_set_cell_updated(k, l);
             }
         }
     }
-    world_set_cell_material(x, y, Smoke);
+    
+    world_move_cell(x, y, x - 1 + rand() % 3, y - 1);
 }
 
 void material_update_water(int x, int y)
@@ -58,13 +59,13 @@ void material_update_water(int x, int y)
         MATERIAL free_l = !world_get_cell_material(x - 1, y);
         MATERIAL free_r = !world_get_cell_material(x + 1, y);
 
-        if(steps % 2 && free_dr)
+        if(rand() % 2 && free_dr)
             world_move_cell(x, y, x + 1, y + 1);
         else if(free_dl)
             world_move_cell(x, y, x - 1, y + 1);
         else if(free_dr)
             world_move_cell(x, y, x + 1, y + 1);
-        else if(steps % 2 && free_r && !free_l)
+        else if(rand() % 2 && free_r && !free_l)
             world_move_cell(x, y, x + 1, y);
         else if (free_l && !free_r)
             world_move_cell(x, y, x - 1, y);
@@ -119,6 +120,34 @@ void material_update_smoke(int x, int y)
         world_move_cell(x, y, x, y - 1);
 }
 
+void material_update_ember(int x, int y)
+{
+    int k, l;
+
+    if (rand() % 127 == 0)
+    {
+        for(k = x - 1; k <= x + 1; k++)
+        {
+            for(l = y - 1; l <= y + 1; l++)
+            {
+                if(world_get_cell_material(k, l) == Wood)
+                {
+                    world_set_cell_material(k, l, Ember);
+                    world_set_cell_updated(k, l);
+                }
+            }
+        }
+    }
+
+    if(!world_get_cell_material(x, y - 1))
+    {
+        if(rand() % (255 - world_get_cell_lifetime(x, y)) == 0)
+            world_set_cell_material(x, y - 1, Fire);
+        else if(rand() % 12 == 0)
+            world_set_cell_material(x, y - 1, Smoke);
+    }
+}
+
 void materials_init()
 {
     MATERIAL_DATA data;
@@ -155,7 +184,7 @@ void materials_init()
     data.update_routine = &material_update_fire;
     data.color = al_map_rgb_f(0.9, 0.3, 0.1);
     data.density = 0;
-    data.initial_lifetime = 0;
+    data.initial_lifetime = 12;
     materials_data[Fire] = data;
 
     data.name = "Water";
@@ -178,6 +207,13 @@ void materials_init()
     data.density = 1;
     data.initial_lifetime = 255;
     materials_data[Smoke] = data;
+
+    data.name = "Ember";
+    data.update_routine = &material_update_ember;
+    data.color = al_map_rgb_f(0.9, 0.4, 0.1);
+    data.density = 0;
+    data.initial_lifetime = 255;
+    materials_data[Ember] = data;
 }
 
 MATERIAL_DATA material_get_data(MATERIAL m)

@@ -6,7 +6,7 @@ typedef unsigned char lifetime_t;
 
 typedef enum
 {
-    Air, Stone, Sand, Wood, Fire, Water, Acid, Smoke, MaterialCount
+    Air, Stone, Sand, Wood, Fire, Water, Acid, Smoke, Ember, MaterialCount
 } MATERIAL;
 
 typedef struct
