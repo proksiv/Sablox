@@ -6,7 +6,7 @@ typedef unsigned char lifetime_t;
 
 typedef enum
 {
-    Air, Stone, Sand, Wood, Fire, Water, Acid, Smoke, Ember, MaterialCount
+    Air, Stone, Sand, Wood, Fire, Water, Acid, Smoke, Ember, Oil, MaterialCount
 } MATERIAL;
 
 typedef struct
@@ -16,6 +16,7 @@ typedef struct
     ALLEGRO_COLOR color;
     unsigned int density;
     lifetime_t initial_lifetime;
+    bool is_fluid;
 } MATERIAL_DATA;
 
 void material_check_density(int x, int y);

@@ -39,10 +39,18 @@ void material_update_fire(int x, int y)
         {
             if(k == x && l == y)
                 continue;
-            if(world_get_cell_material(k, l) == Wood)
+            MATERIAL m = world_get_cell_material(k, l);
+            if(m == Wood)
             {
                 world_set_cell_material(k, l, Ember);
                 world_set_cell_updated(k, l);
+            }
+            else if(m == Oil && rand() % 4 == 0)
+            {
+                world_set_cell_material(k, l, Fire);
+                world_set_cell_updated(k, l);
+                if(!world_get_cell_material(x, y - 1))
+                    world_set_cell_material(x, y - 1, Smoke);
             }
         }
     }
@@ -50,27 +58,33 @@ void material_update_fire(int x, int y)
     world_move_cell(x, y, x - 1 + rand() % 3, y - 1);
 }
 
-void material_update_water(int x, int y)
+void material_update_fluid(int x, int y)
 {
     if(world_get_cell_material(x, y + 1))
     {
-        MATERIAL free_dl = !world_get_cell_material(x - 1, y + 1);
-        MATERIAL free_dr = !world_get_cell_material(x + 1, y + 1);
-        MATERIAL free_l = !world_get_cell_material(x - 1, y);
-        MATERIAL free_r = !world_get_cell_material(x + 1, y);
+        MATERIAL self = world_get_cell_material(x, y);
+
+        MATERIAL dl = world_get_cell_material(x - 1, y + 1);
+        bool free_dl = !dl || (material_get_data(dl).is_fluid && self != dl);
+        MATERIAL dr = world_get_cell_material(x + 1, y + 1);
+        bool free_dr = !dr || (material_get_data(dr).is_fluid && self != dr);
+        MATERIAL l = world_get_cell_material(x - 1, y);
+        bool free_l = !l || (material_get_data(l).is_fluid && self != l);
+        MATERIAL r = world_get_cell_material(x + 1, y);
+        bool free_r = !r || (material_get_data(r).is_fluid && self != r);
 
         if(rand() % 2 && free_dr)
-            world_move_cell(x, y, x + 1, y + 1);
+            world_swap_cells(x, y, x + 1, y + 1);
         else if(free_dl)
-            world_move_cell(x, y, x - 1, y + 1);
+            world_swap_cells(x, y, x - 1, y + 1);
         else if(free_dr)
-            world_move_cell(x, y, x + 1, y + 1);
+            world_swap_cells(x, y, x + 1, y + 1);
         else if(rand() % 2 && free_r && !free_l)
-            world_move_cell(x, y, x + 1, y);
+            world_swap_cells(x, y, x + 1, y);
         else if (free_l && !free_r)
-            world_move_cell(x, y, x - 1, y);
+            world_swap_cells(x, y, x - 1, y);
         else if (free_r && !free_l)
-            world_move_cell(x, y, x + 1, y);
+            world_swap_cells(x, y, x + 1, y);
     }
     else
         world_move_cell(x, y, x, y + 1);
@@ -98,8 +112,6 @@ void material_update_acid(int x, int y)
     }
     if(consumed)
         world_set_cell_material(x, y, Air);
-
-    material_update_water(x, y);
 }
 
 void material_update_smoke(int x, int y)
@@ -135,6 +147,11 @@ void material_update_ember(int x, int y)
                     world_set_cell_material(k, l, Ember);
                     world_set_cell_updated(k, l);
                 }
+                else if(world_get_cell_material(k, l) == Oil)
+                {
+                    world_set_cell_material(k, l, Fire);
+                    world_set_cell_updated(k, l);
+                }
             }
         }
     }
@@ -157,6 +174,7 @@ void materials_init()
     data.color = al_map_rgba_f(0.0, 0.0, 0.0, 0.0);
     data.density = 0;
     data.initial_lifetime = 0;
+    data.is_fluid = false;
     materials_data[Air] = data;
 
     data.name = "Stone";
@@ -164,6 +182,7 @@ void materials_init()
     data.color = al_map_rgb_f(0.5, 0.5, 0.5);
     data.density = 0;
     data.initial_lifetime = 0;
+    data.is_fluid = false;
     materials_data[Stone] = data;
 
     data.name = "Sand";
@@ -171,6 +190,7 @@ void materials_init()
     data.color = al_map_rgb_f(0.7, 0.7, 0.5);
     data.density = 1442;
     data.initial_lifetime = 0;
+    data.is_fluid = false;
     materials_data[Sand] = data;
 
     data.name = "Wood";
@@ -178,6 +198,7 @@ void materials_init()
     data.color = al_map_rgb_f(0.5, 0.3, 0.2);
     data.density = 0;
     data.initial_lifetime = 0;
+    data.is_fluid = false;
     materials_data[Wood] = data;
 
     data.name = "Fire";
@@ -185,13 +206,15 @@ void materials_init()
     data.color = al_map_rgb_f(0.9, 0.3, 0.1);
     data.density = 0;
     data.initial_lifetime = 12;
+    data.is_fluid = false;
     materials_data[Fire] = data;
 
     data.name = "Water";
-    data.update_routine = &material_update_water;
+    data.update_routine = NULL;
     data.color = al_map_rgb_f(0.1, 0.5, 0.9);
     data.density = 1000;
     data.initial_lifetime = 0;
+    data.is_fluid = true;
     materials_data[Water] = data;
 
     data.name = "Acid";
@@ -199,6 +222,7 @@ void materials_init()
     data.color = al_map_rgb_f(0.7, 0.8, 0.1);
     data.density = 1200;
     data.initial_lifetime = 0;
+    data.is_fluid = true;
     materials_data[Acid] = data;
 
     data.name = "Smoke";
@@ -206,6 +230,7 @@ void materials_init()
     data.color = al_map_rgb_f(0.3, 0.3, 0.3);
     data.density = 1;
     data.initial_lifetime = 255;
+    data.is_fluid = false;
     materials_data[Smoke] = data;
 
     data.name = "Ember";
@@ -213,7 +238,16 @@ void materials_init()
     data.color = al_map_rgb_f(0.9, 0.4, 0.1);
     data.density = 0;
     data.initial_lifetime = 255;
+    data.is_fluid = false;
     materials_data[Ember] = data;
+
+    data.name = "Oil";
+    data.update_routine = NULL;
+    data.color = al_map_rgb_f(0.7, 0.6, 0.4);
+    data.density = 900;
+    data.initial_lifetime = 0;
+    data.is_fluid = true;
+    materials_data[Oil] = data;
 }
 
 MATERIAL_DATA material_get_data(MATERIAL m)

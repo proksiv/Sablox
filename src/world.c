@@ -143,6 +143,8 @@ void world_paint(int cell_x, int cell_y, MATERIAL m)
     }
 }
 
+
+void material_update_fluid(int x, int y);
 void world_update()
 {
     int i, j;
@@ -160,6 +162,9 @@ void world_update()
 
             if(data.update_routine != NULL)
                 data.update_routine(i, j);
+
+            if(data.is_fluid)
+                material_update_fluid(i, j);
             
             material_check_density(i, j);
         }
