@@ -41,12 +41,12 @@ int main()
 
     must_init(al_init_image_addon(), "image addon");
 
-    ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
+    /*ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
     al_set_path_filename(path, ASSETS_DIR"/mysha.png");
 
     ALLEGRO_BITMAP* mysha = al_load_bitmap(al_path_cstr(path, '/'));
     must_init(mysha, "mysha");
-    al_destroy_path(path);
+    al_destroy_path(path);*/
 
     must_init(al_init_primitives_addon(), "primitives addon");
 
@@ -118,7 +118,7 @@ int main()
         }
     }
 
-    al_destroy_bitmap(mysha);
+    // al_destroy_bitmap(mysha);
 
     al_destroy_font(font);
     al_destroy_display(disp);
