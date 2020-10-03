@@ -268,6 +268,15 @@ void materials_init()
     data.is_fluid = true;
     data.hardness = 1;
     materials_data[Oil] = data;
+
+    data.name = "Obsidian";
+    data.update_routine = NULL;
+    data.color = al_map_rgb_f(0.2, 0.2, 0.2);
+    data.density = 0;
+    data.initial_lifetime = 0;
+    data.is_fluid = false;
+    data.hardness = 255;
+    materials_data[Obsidian] = data;
 }
 
 MATERIAL_DATA material_get_data(MATERIAL m)
