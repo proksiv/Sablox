@@ -109,8 +109,8 @@ void material_update_acid(int x, int y)
         {
             if(k == x && l == y)
                 continue;
-            MATERIAL target = world_get_cell_material(k, l);
-            if(target != Acid && target != Air)
+
+            if(material_get_data(world_get_cell_material(k, l)).hardness < 255)
             {
                 world_set_cell_material(k, l, Air);
                 world_set_cell_updated(k, l);
@@ -185,6 +185,7 @@ void materials_init()
     data.density = 0;
     data.initial_lifetime = 0;
     data.is_fluid = false;
+    data.hardness = 255;
     materials_data[Air] = data;
 
     data.name = "Stone";
@@ -193,6 +194,7 @@ void materials_init()
     data.density = 0;
     data.initial_lifetime = 0;
     data.is_fluid = false;
+    data.hardness = 1;
     materials_data[Stone] = data;
 
     data.name = "Sand";
@@ -201,6 +203,7 @@ void materials_init()
     data.density = 1442;
     data.initial_lifetime = 0;
     data.is_fluid = false;
+    data.hardness = 1;
     materials_data[Sand] = data;
 
     data.name = "Wood";
@@ -209,6 +212,7 @@ void materials_init()
     data.density = 0;
     data.initial_lifetime = 0;
     data.is_fluid = false;
+    data.hardness = 1;
     materials_data[Wood] = data;
 
     data.name = "Fire";
@@ -217,6 +221,7 @@ void materials_init()
     data.density = 0;
     data.initial_lifetime = 12;
     data.is_fluid = false;
+    data.hardness = 1;
     materials_data[Fire] = data;
 
     data.name = "Water";
@@ -225,6 +230,7 @@ void materials_init()
     data.density = 1000;
     data.initial_lifetime = 0;
     data.is_fluid = true;
+    data.hardness = 1;
     materials_data[Water] = data;
 
     data.name = "Acid";
@@ -233,6 +239,7 @@ void materials_init()
     data.density = 1200;
     data.initial_lifetime = 0;
     data.is_fluid = true;
+    data.hardness = 255;
     materials_data[Acid] = data;
 
     data.name = "Smoke";
@@ -241,6 +248,7 @@ void materials_init()
     data.density = 1;
     data.initial_lifetime = 255;
     data.is_fluid = false;
+    data.hardness = 1;
     materials_data[Smoke] = data;
 
     data.name = "Ember";
@@ -249,6 +257,7 @@ void materials_init()
     data.density = 0;
     data.initial_lifetime = 255;
     data.is_fluid = false;
+    data.hardness = 1;
     materials_data[Ember] = data;
 
     data.name = "Oil";
@@ -257,6 +266,7 @@ void materials_init()
     data.density = 900;
     data.initial_lifetime = 0;
     data.is_fluid = true;
+    data.hardness = 1;
     materials_data[Oil] = data;
 }
 

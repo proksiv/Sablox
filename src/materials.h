@@ -3,6 +3,7 @@
 #include <allegro5/allegro5.h>
 
 typedef unsigned char lifetime_t;
+typedef unsigned char hardness_t;
 
 typedef enum
 {
@@ -17,6 +18,7 @@ typedef struct
     unsigned int density;
     lifetime_t initial_lifetime;
     bool is_fluid;
+    hardness_t hardness;
 } MATERIAL_DATA;
 
 void materials_init();
