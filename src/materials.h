@@ -19,8 +19,6 @@ typedef struct
     bool is_fluid;
 } MATERIAL_DATA;
 
-void material_check_density(int x, int y);
-
 void materials_init();
 
 MATERIAL_DATA material_get_data(MATERIAL m);

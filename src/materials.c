@@ -3,12 +3,52 @@
 
 MATERIAL_DATA materials_data[MaterialCount];
 
-void material_check_density(int x, int y)
+/* Private functions */
+
+void material_postcheck_density(int x, int y)
 {
+    if(world_get_cell_updated(x, y) == steps % 2)
+        return;
+
     MATERIAL_DATA self = material_get_data(world_get_cell_material(x, y));
     MATERIAL_DATA below = material_get_data(world_get_cell_material(x, y + 1));
     if(below.density > 0 && self.density > below.density)
         world_swap_cells(x, y, x, y + 1);
+}
+
+void material_postupdate_fluid(int x, int y)
+{
+    if(world_get_cell_updated(x, y) == steps % 2)
+        return;
+
+    if(world_get_cell_material(x, y + 1))
+    {
+        MATERIAL self = world_get_cell_material(x, y);
+
+        MATERIAL dl = world_get_cell_material(x - 1, y + 1);
+        bool free_dl = !dl || (material_get_data(dl).is_fluid && self != dl);
+        MATERIAL dr = world_get_cell_material(x + 1, y + 1);
+        bool free_dr = !dr || (material_get_data(dr).is_fluid && self != dr);
+        MATERIAL l = world_get_cell_material(x - 1, y);
+        bool free_l = !l || (material_get_data(l).is_fluid && self != l);
+        MATERIAL r = world_get_cell_material(x + 1, y);
+        bool free_r = !r || (material_get_data(r).is_fluid && self != r);
+
+        if(rand() % 2 && free_dr)
+            world_swap_cells(x, y, x + 1, y + 1);
+        else if(free_dl)
+            world_swap_cells(x, y, x - 1, y + 1);
+        else if(free_dr)
+            world_swap_cells(x, y, x + 1, y + 1);
+        else if(rand() % 2 && free_r && !free_l)
+            world_swap_cells(x, y, x + 1, y);
+        else if (free_l && !free_r)
+            world_swap_cells(x, y, x - 1, y);
+        else if (free_r && !free_l)
+            world_swap_cells(x, y, x + 1, y);
+    }
+    else
+        world_move_cell(x, y, x, y + 1);
 }
 
 void material_update_sand(int x, int y)
@@ -56,38 +96,6 @@ void material_update_fire(int x, int y)
     }
     
     world_move_cell(x, y, x - 1 + rand() % 3, y - 1);
-}
-
-void material_update_fluid(int x, int y)
-{
-    if(world_get_cell_material(x, y + 1))
-    {
-        MATERIAL self = world_get_cell_material(x, y);
-
-        MATERIAL dl = world_get_cell_material(x - 1, y + 1);
-        bool free_dl = !dl || (material_get_data(dl).is_fluid && self != dl);
-        MATERIAL dr = world_get_cell_material(x + 1, y + 1);
-        bool free_dr = !dr || (material_get_data(dr).is_fluid && self != dr);
-        MATERIAL l = world_get_cell_material(x - 1, y);
-        bool free_l = !l || (material_get_data(l).is_fluid && self != l);
-        MATERIAL r = world_get_cell_material(x + 1, y);
-        bool free_r = !r || (material_get_data(r).is_fluid && self != r);
-
-        if(rand() % 2 && free_dr)
-            world_swap_cells(x, y, x + 1, y + 1);
-        else if(free_dl)
-            world_swap_cells(x, y, x - 1, y + 1);
-        else if(free_dr)
-            world_swap_cells(x, y, x + 1, y + 1);
-        else if(rand() % 2 && free_r && !free_l)
-            world_swap_cells(x, y, x + 1, y);
-        else if (free_l && !free_r)
-            world_swap_cells(x, y, x - 1, y);
-        else if (free_r && !free_l)
-            world_swap_cells(x, y, x + 1, y);
-    }
-    else
-        world_move_cell(x, y, x, y + 1);
 }
 
 void material_update_acid(int x, int y)
@@ -164,6 +172,8 @@ void material_update_ember(int x, int y)
             world_set_cell_material(x, y - 1, Smoke);
     }
 }
+
+/* Public functions */
 
 void materials_init()
 {

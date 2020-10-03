@@ -116,6 +116,9 @@ bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
 
 void world_swap_cells(int ax, int ay, int bx, int by)
 {
+    if(material_get_data(world_get_cell_material(ax, ay)).density < material_get_data(world_get_cell_material(bx, by)).density)
+        return;
+
     CELL temp = world[ax][ay];
     memcpy(&(world[ax][ay]), &(world[bx][by]), sizeof(CELL));
     world_redraw_cell(ax, ay);
@@ -143,8 +146,8 @@ void world_paint(int cell_x, int cell_y, MATERIAL m)
     }
 }
 
-
-void material_update_fluid(int x, int y);
+void material_postcheck_density(int x, int y);
+void material_postupdate_fluid(int x, int y);
 void world_update()
 {
     int i, j;
@@ -164,9 +167,9 @@ void world_update()
                 data.update_routine(i, j);
 
             if(data.is_fluid)
-                material_update_fluid(i, j);
-            
-            material_check_density(i, j);
+                material_postupdate_fluid(i, j);
+
+            material_postcheck_density(i, j);
         }
     }
 
