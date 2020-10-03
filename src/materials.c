@@ -77,8 +77,6 @@ void material_update_fire(int x, int y)
     {
         for(l = y - 1; l <= y + 1; l++)
         {
-            if(k == x && l == y)
-                continue;
             MATERIAL m = world_get_cell_material(k, l);
             if(m == Wood)
             {
@@ -107,9 +105,6 @@ void material_update_acid(int x, int y)
     {
         for(l = y; l <= y + 1; l++)
         {
-            if(k == x && l == y)
-                continue;
-
             if(material_get_data(world_get_cell_material(k, l)).hardness < 255)
             {
                 world_set_cell_material(k, l, Air);
@@ -170,6 +165,33 @@ void material_update_ember(int x, int y)
             world_set_cell_material(x, y - 1, Fire);
         else if(rand() % 12 == 0)
             world_set_cell_material(x, y - 1, Smoke);
+    }
+}
+
+void material_update_lava(int x, int y)
+{
+    int k, l;
+
+    for(k = x - 1; k <= x + 1; k++)
+    {
+        for(l = y - 1; l <= y + 1; l++)
+        {
+            MATERIAL m = world_get_cell_material(k, l);
+            if(m == Wood)
+            {
+                world_set_cell_material(k, l, Ember);
+                world_set_cell_updated(k, l);
+            }
+            else if(m == Oil)
+            {
+                world_set_cell_material(k, l, Fire);
+                world_set_cell_updated(k, l);
+                if(!world_get_cell_material(x, y - 1))
+                    world_set_cell_material(x, y - 1, Smoke);
+            }
+            else if(m == Water)
+                world_set_cell_material(x, y, Obsidian);
+        }
     }
 }
 
@@ -277,6 +299,15 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 255;
     materials_data[Obsidian] = data;
+
+    data.name = "Lava";
+    data.update_routine = &material_update_lava;
+    data.color = al_map_rgb_f(0.8, 0.1, 0.1);
+    data.density = 3100;
+    data.initial_lifetime = 0;
+    data.is_fluid = true;
+    data.hardness = 255;
+    materials_data[Lava] = data;
 }
 
 MATERIAL_DATA material_get_data(MATERIAL m)

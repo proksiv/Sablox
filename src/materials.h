@@ -7,7 +7,7 @@ typedef unsigned char hardness_t;
 
 typedef enum
 {
-    Air, Stone, Sand, Wood, Fire, Water, Acid, Smoke, Ember, Oil, Obsidian, MaterialCount
+    Air, Stone, Sand, Wood, Fire, Water, Acid, Smoke, Ember, Oil, Obsidian, Lava, MaterialCount
 } MATERIAL;
 
 typedef struct
