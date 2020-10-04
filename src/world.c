@@ -5,7 +5,6 @@
 #include "world.h"
 
 #define CELLS_TO_RENDER (WORLD_W - 2)*(WORLD_H - 2)
-const int CELL_SIZE = 4;
 const int RENDER_H = WORLD_H - 2;
 
 typedef struct {
@@ -15,7 +14,7 @@ typedef struct {
 
 CELL world[WORLD_W][WORLD_H];
 
-ALLEGRO_VERTEX varray[CELLS_TO_RENDER*6];
+ALLEGRO_VERTEX varray[CELLS_TO_RENDER];
 ALLEGRO_VERTEX_BUFFER* vbuf;
 
 /* Private functions */
@@ -25,11 +24,10 @@ static void world_redraw_cell(int cell_x, int cell_y)
     if (cell_x <= 0 || cell_y <= 0 || cell_x >= WORLD_W - 1 || cell_y >= WORLD_H - 1)
         return;
 
-    int index = ((cell_x - 1)*RENDER_H + (cell_y - 1))*6;
-    void* lock_mem = al_lock_vertex_buffer(vbuf, index, 6, ALLEGRO_LOCK_WRITEONLY);
-    varray[index].color = varray[index + 1].color = varray[index + 2].color = varray[index + 3].color = varray[index + 4].color
-        = varray[index + 5].color = material_get_data(world_get_cell_material(cell_x, cell_y)).color;
-    memcpy(lock_mem, varray + index, sizeof(ALLEGRO_VERTEX)*6);
+    int index = ((cell_x - 1)*RENDER_H + (cell_y - 1));
+    void* lock_mem = al_lock_vertex_buffer(vbuf, index, 1, ALLEGRO_LOCK_WRITEONLY);
+    varray[index].color = material_get_data(world_get_cell_material(cell_x, cell_y)).color;
+    memcpy(lock_mem, varray + index, sizeof(ALLEGRO_VERTEX));
     al_unlock_vertex_buffer(vbuf);
 }
 
@@ -49,21 +47,16 @@ void world_init()
     memset(&world, 0, sizeof(world));
     steps = 0;
     
-    int i, cell_x, cell_y;
+    int i;
     for(i = 0; i < CELLS_TO_RENDER; i++)
     {
-        cell_x = i/RENDER_H;
-        cell_y = i%RENDER_H;
-        ALLEGRO_VERTEX* v = &varray[i*6];
-        v[0].x = v[2].x = v[3].x = cell_x*CELL_SIZE;
-        v[0].y = v[1].y = v[5].y = cell_y*CELL_SIZE;
-        v[1].x = v[4].x = v[5].x = cell_x*CELL_SIZE + CELL_SIZE;
-        v[2].y = v[3].y = v[4].y = cell_y*CELL_SIZE + CELL_SIZE;
-        v[0].z = v[1].z = v[2].z = v[3].z = v[4].z = v[5].z = 0;
-        v[0].color = v[1].color = v[2].color = v[3].color = v[4].color = v[5].color = material_get_data(Air).color;
+        varray[i].x = i/RENDER_H;
+        varray[i].y = i%RENDER_H;
+        varray[i].z = 0;
+        varray[i].color = material_get_data(Air).color;
     }
 
-    vbuf = al_create_vertex_buffer(NULL, varray, CELLS_TO_RENDER*6, ALLEGRO_PRIM_BUFFER_STREAM);
+    vbuf = al_create_vertex_buffer(NULL, varray, CELLS_TO_RENDER, ALLEGRO_PRIM_BUFFER_STREAM);
 }
 
 bool world_get_cell_updated(int cell_x, int cell_y)
@@ -178,5 +171,5 @@ void world_update()
 
 void world_render()
 {
-    al_draw_vertex_buffer(vbuf, NULL, 0, CELLS_TO_RENDER*6, ALLEGRO_PRIM_TRIANGLE_LIST);
+    al_draw_vertex_buffer(vbuf, NULL, 0, CELLS_TO_RENDER, ALLEGRO_PRIM_POINT_LIST);
 }

@@ -8,8 +8,8 @@
 #include "world.h"
 
 #define ASSETS_DIR "../assets"
-#define WINDOW_W 640
-#define WINDOW_H 480
+#define WINDOW_W 384
+#define WINDOW_H 216
 
 void must_init(bool test, const char *description)
 {
@@ -78,7 +78,7 @@ int main()
                 mat = state.z % MaterialCount;
 
                 if(state.buttons & 1)
-                    world_paint(state.x/4 + 1, state.y/4 + 1, mat);
+                    world_paint(state.x + 1, state.y + 1, mat);
                 
                 if(!paused)
                     world_update();

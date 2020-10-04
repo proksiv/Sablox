@@ -1,6 +1,8 @@
 #include "materials.h"
 #include "world.h"
 
+long steps;
+
 MATERIAL_DATA materials_data[MaterialCount];
 
 /* Private functions */

@@ -2,8 +2,8 @@
 
 #include "materials.h"
 
-#define WORLD_W 162
-#define WORLD_H 122
+#define WORLD_W 386
+#define WORLD_H 218
 
 extern long steps;
 
