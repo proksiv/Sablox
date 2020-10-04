@@ -20,7 +20,7 @@ ALLEGRO_VERTEX_BUFFER* vbuf;
 
 /* Private functions */
 
-void world_redraw_cell(int cell_x, int cell_y)
+static void world_redraw_cell(int cell_x, int cell_y)
 {
     if (cell_x <= 0 || cell_y <= 0 || cell_x >= WORLD_W - 1 || cell_y >= WORLD_H - 1)
         return;
@@ -33,7 +33,7 @@ void world_redraw_cell(int cell_x, int cell_y)
     al_unlock_vertex_buffer(vbuf);
 }
 
-void world_check_cell_lifetime(int cell_x, int cell_y)
+static void world_check_cell_lifetime(int cell_x, int cell_y)
 {
     CELL* cell = &(world[cell_x][cell_y]);
     cell->lifetime--;

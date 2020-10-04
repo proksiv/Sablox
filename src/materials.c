@@ -51,7 +51,7 @@ void material_postupdate_fluid(int x, int y)
         world_move_cell(x, y, x, y + 1);
 }
 
-void material_update_sand(int x, int y)
+static void material_update_sand(int x, int y)
 {
     if(world_get_cell_material(x, y + 1))
     {
@@ -69,7 +69,7 @@ void material_update_sand(int x, int y)
         world_move_cell(x, y, x, y + 1);
 }
 
-void material_update_fire(int x, int y)
+static void material_update_fire(int x, int y)
 {
     int k, l;
 
@@ -96,7 +96,7 @@ void material_update_fire(int x, int y)
     world_move_cell(x, y, x - 1 + rand() % 3, y - 1);
 }
 
-void material_update_acid(int x, int y)
+static void material_update_acid(int x, int y)
 {
     int k, l;
     bool consumed = false;
@@ -118,7 +118,7 @@ void material_update_acid(int x, int y)
         world_set_cell_material(x, y, Air);
 }
 
-void material_update_smoke(int x, int y)
+static void material_update_smoke(int x, int y)
 {
     if(world_get_cell_material(x, y - 1))
     {
@@ -136,7 +136,7 @@ void material_update_smoke(int x, int y)
         world_move_cell(x, y, x, y - 1);
 }
 
-void material_update_ember(int x, int y)
+static void material_update_ember(int x, int y)
 {
     int k, l;
 
@@ -169,7 +169,7 @@ void material_update_ember(int x, int y)
     }
 }
 
-void material_update_lava(int x, int y)
+static void material_update_lava(int x, int y)
 {
     int k, l;
 

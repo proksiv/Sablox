@@ -5,7 +5,7 @@
 #define WORLD_W 162
 #define WORLD_H 122
 
-long steps;
+extern long steps;
 
 void world_init();
 
