@@ -62,6 +62,10 @@ int main()
     bool paused = false;
     ALLEGRO_EVENT event;
 
+    ALLEGRO_TRANSFORM trans;
+    float sx = 1;
+    float sy = 1;
+
     ALLEGRO_MOUSE_STATE state;
 
     MATERIAL mat = Air;
@@ -78,7 +82,7 @@ int main()
                 mat = state.z % MaterialCount;
 
                 if(state.buttons & 1)
-                    world_paint(state.x + 1, state.y + 1, mat);
+                    world_paint(state.x/sx + 1, state.y/sy + 1, mat);
                 
                 if(!paused)
                     world_update();
@@ -89,6 +93,19 @@ int main()
             case ALLEGRO_EVENT_KEY_DOWN:
                 if(event.keyboard.keycode == ALLEGRO_KEY_SPACE)
                     paused = !paused;
+                else if(event.keyboard.keycode == ALLEGRO_KEY_F)
+                {
+                    al_set_display_flag(disp, ALLEGRO_FULLSCREEN_WINDOW, !(al_get_display_flags(disp) & ALLEGRO_FULLSCREEN_WINDOW));
+                    al_acknowledge_resize(disp);
+                    float w = al_get_display_width(disp);
+                    float h = al_get_display_height(disp);
+                    float aspect_ratio = w/h;
+                    al_identity_transform(&trans);
+                    sx = w/(WINDOW_H*aspect_ratio);
+                    sy = h/WINDOW_H;
+                    al_scale_transform(&trans, sx, sy);
+                    al_use_transform(&trans);
+                }
                 break;
 
             case ALLEGRO_EVENT_DISPLAY_CLOSE:
