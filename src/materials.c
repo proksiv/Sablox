@@ -103,7 +103,7 @@ void material_update_acid(int x, int y)
 
     for(k = x - 1; k <= x + 1; k++)
     {
-        for(l = y; l <= y + 1; l++)
+        for(l = y - 1; l <= y + 1; l++)
         {
             if(material_get_data(world_get_cell_material(k, l)).hardness < 255)
             {
@@ -113,6 +113,7 @@ void material_update_acid(int x, int y)
             }
         }
     }
+    
     if(consumed)
         world_set_cell_material(x, y, Air);
 }
