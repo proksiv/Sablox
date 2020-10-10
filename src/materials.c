@@ -103,15 +103,18 @@ static void material_update_acid(int x, int y)
     int k, l;
     bool consumed = false;
 
-    for(k = x - 1; k <= x + 1; k++)
+    if(rand() % 16 == 0)
     {
-        for(l = y - 1; l <= y + 1; l++)
+        for(k = x - 1; k <= x + 1; k++)
         {
-            if(material_get_data(world_get_cell_material(k, l)).hardness < 255)
+            for(l = y - 1; l <= y + 1; l++)
             {
-                world_set_cell_material(k, l, Air);
-                world_set_cell_updated(k, l);
-                consumed = true;
+                if(material_get_data(world_get_cell_material(k, l)).hardness < 255)
+                {
+                    world_set_cell_material(k, l, Air);
+                    world_set_cell_updated(k, l);
+                    consumed = true;
+                }
             }
         }
     }
