@@ -10,6 +10,7 @@ const int RENDER_H = WORLD_H - 2;
 typedef struct {
     MATERIAL m;
     lifetime_t lifetime;
+    ALLEGRO_COLOR color;
 } CELL;
 
 CELL world[WORLD_W][WORLD_H];
@@ -27,7 +28,7 @@ static void world_redraw_cell(int cell_x, int cell_y)
     int index = ((cell_x - 1)*RENDER_H + (cell_y - 1))*6;
     void* lock_mem = al_lock_vertex_buffer(vbuf, index, 6, ALLEGRO_LOCK_WRITEONLY);
     varray[index].color = varray[index + 1].color = varray[index + 2].color = varray[index + 3].color = varray[index + 4].color
-        = varray[index + 5].color = material_get_data(world_get_cell_material(cell_x, cell_y)).color;
+        = varray[index + 5].color = world[cell_x][cell_y].color;
     memcpy(lock_mem, varray + index, sizeof(ALLEGRO_VERTEX)*6);
     al_unlock_vertex_buffer(vbuf);
 }
@@ -38,6 +39,11 @@ static void world_check_cell_lifetime(int cell_x, int cell_y)
     cell->lifetime--;
     if(cell->lifetime == 0)
         world_set_cell_material(cell_x, cell_y, Air);
+}
+
+static float clamp(float value, float min, float max)
+{
+    return value < min ? min : value > max ? max : value;
 }
 
 /* Public functions */
@@ -87,6 +93,16 @@ void world_set_cell_material(int cell_x, int cell_y, MATERIAL m)
 {
     world[cell_x][cell_y].m = (world_get_cell_updated(cell_x, cell_y) << 7) | m;
     world_set_cell_lifetime(cell_x, cell_y, material_get_data(m).initial_lifetime);
+
+    ALLEGRO_COLOR color = material_get_data(world_get_cell_material(cell_x, cell_y)).color;
+    if(color.a > 0)
+    {
+        color.r = clamp(color.r - 0.05 + (float)rand()/(float)(RAND_MAX/0.1), 0.0, 1.0);
+        color.g = clamp(color.g - 0.05 + (float)rand()/(float)(RAND_MAX/0.1), 0.0, 1.0);
+        color.b = clamp(color.b - 0.05 + (float)rand()/(float)(RAND_MAX/0.1), 0.0, 1.0);
+    }
+    world[cell_x][cell_y].color = color;
+
     world_redraw_cell(cell_x, cell_y);
 }
 
