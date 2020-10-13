@@ -2,7 +2,6 @@
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
-#include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
 #include "world.h"
@@ -33,20 +32,22 @@ int main()
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     must_init(queue, "queue");
 
+    al_set_new_display_flags(ALLEGRO_OPENGL|ALLEGRO_PROGRAMMABLE_PIPELINE);
     ALLEGRO_DISPLAY* disp = al_create_display(WINDOW_W, WINDOW_H);
     must_init(disp, "display");
 
     ALLEGRO_FONT* font = al_create_builtin_font();
     must_init(font, "font");
 
-    must_init(al_init_image_addon(), "image addon");
-
-    /*ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
-    al_set_path_filename(path, ASSETS_DIR"/mysha.png");
-
-    ALLEGRO_BITMAP* mysha = al_load_bitmap(al_path_cstr(path, '/'));
-    must_init(mysha, "mysha");
-    al_destroy_path(path);*/
+    ALLEGRO_SHADER* sh_brightness_filter = al_create_shader(ALLEGRO_SHADER_GLSL);
+    must_init(sh_brightness_filter, "brightness_filter shader");
+    ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
+    al_set_path_filename(path, ASSETS_DIR"/shader/brightness_filter_v.glsl");
+    must_init(al_attach_shader_source_file(sh_brightness_filter, ALLEGRO_VERTEX_SHADER, al_path_cstr(path, '/')), "brightness_filter vertex shader source");
+    al_set_path_filename(path, ASSETS_DIR"/shader/brightness_filter_p.glsl");
+    must_init(al_attach_shader_source_file(sh_brightness_filter, ALLEGRO_PIXEL_SHADER, al_path_cstr(path, '/')), "brightness_filter pixel shader source");
+    al_destroy_path(path);
+    must_init(al_build_shader(sh_brightness_filter), "brightness_filter shader build");
 
     must_init(al_init_primitives_addon(), "primitives addon");
 
@@ -121,8 +122,10 @@ int main()
             al_clear_to_color(al_map_rgb(0, 0, 0));
 
             // al_draw_bitmap(mysha, 0, 0, 0);
+            al_use_shader(sh_brightness_filter);
             world_render();
 
+            al_use_shader(NULL);
             const char* m_name = material_get_data(mat).name;
             al_draw_text(font, al_map_rgb_f(1.0, 1.0, 1.0), 0, 0, 0, m_name);
 
