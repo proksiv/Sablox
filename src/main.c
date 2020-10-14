@@ -39,15 +39,33 @@ int main()
     ALLEGRO_FONT* font = al_create_builtin_font();
     must_init(font, "font");
 
+    ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
+
     ALLEGRO_SHADER* sh_brightness_filter = al_create_shader(ALLEGRO_SHADER_GLSL);
     must_init(sh_brightness_filter, "brightness_filter shader");
-    ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
     al_set_path_filename(path, ASSETS_DIR"/shader/brightness_filter_v.glsl");
     must_init(al_attach_shader_source_file(sh_brightness_filter, ALLEGRO_VERTEX_SHADER, al_path_cstr(path, '/')), "brightness_filter vertex shader source");
     al_set_path_filename(path, ASSETS_DIR"/shader/brightness_filter_p.glsl");
     must_init(al_attach_shader_source_file(sh_brightness_filter, ALLEGRO_PIXEL_SHADER, al_path_cstr(path, '/')), "brightness_filter pixel shader source");
-    al_destroy_path(path);
     must_init(al_build_shader(sh_brightness_filter), "brightness_filter shader build");
+
+    ALLEGRO_SHADER* sh_blur_h = al_create_shader(ALLEGRO_SHADER_GLSL);
+    must_init(sh_blur_h, "horizontal_blur shader");
+    al_set_path_filename(path, ASSETS_DIR"/shader/horizontal_blur_v.glsl");
+    must_init(al_attach_shader_source_file(sh_blur_h, ALLEGRO_VERTEX_SHADER, al_path_cstr(path, '/')), "horizontal_blur vertex shader source");
+    al_set_path_filename(path, ASSETS_DIR"/shader/blur_p.glsl");
+    must_init(al_attach_shader_source_file(sh_blur_h, ALLEGRO_PIXEL_SHADER, al_path_cstr(path, '/')), "horizontal_blur pixel shader source");
+    must_init(al_build_shader(sh_blur_h), "horizontal_blur shader build");
+
+    ALLEGRO_SHADER* sh_blur_v = al_create_shader(ALLEGRO_SHADER_GLSL);
+    must_init(sh_blur_v, "vertical_blur shader");
+    al_set_path_filename(path, ASSETS_DIR"/shader/vertical_blur_v.glsl");
+    must_init(al_attach_shader_source_file(sh_blur_v, ALLEGRO_VERTEX_SHADER, al_path_cstr(path, '/')), "vertical_blur vertex shader source");
+    al_set_path_filename(path, ASSETS_DIR"/shader/blur_p.glsl");
+    must_init(al_attach_shader_source_file(sh_blur_v, ALLEGRO_PIXEL_SHADER, al_path_cstr(path, '/')), "vertical_blur pixel shader source");
+    must_init(al_build_shader(sh_blur_v), "vertical_blur shader build");
+
+    al_destroy_path(path);
 
     must_init(al_init_primitives_addon(), "primitives addon");
 
@@ -122,9 +140,28 @@ int main()
             al_clear_to_color(al_map_rgb(0, 0, 0));
 
             // al_draw_bitmap(mysha, 0, 0, 0);
-            al_use_shader(sh_brightness_filter);
+
+            ALLEGRO_BITMAP* original = al_create_bitmap(WINDOW_W, WINDOW_H);
+            ALLEGRO_BITMAP* bloom = al_create_bitmap(WINDOW_W, WINDOW_H);
+
+            al_set_target_bitmap(original);
             world_render();
 
+            al_set_target_bitmap(bloom);
+            al_use_shader(sh_brightness_filter);
+            al_draw_bitmap(original, 0, 0, 0);
+            al_use_shader(sh_blur_v);
+            al_draw_bitmap(bloom, 0, 0, 0);
+            al_use_shader(sh_blur_h);
+            al_draw_bitmap(bloom, 0, 0, 0);
+            
+            al_set_target_backbuffer(disp);
+            al_draw_bitmap(original, 0, 0, 0);
+            al_draw_bitmap(bloom, 0, 0, 0);
+
+            al_destroy_bitmap(original);
+            al_destroy_bitmap(bloom);
+            
             al_use_shader(NULL);
             const char* m_name = material_get_data(mat).name;
             al_draw_text(font, al_map_rgb_f(1.0, 1.0, 1.0), 0, 0, 0, m_name);
