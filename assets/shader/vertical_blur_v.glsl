@@ -6,7 +6,7 @@ void main()
 {
     gl_Position = al_projview_matrix*al_pos;
     vec4 centerTexCoords = gl_Position*0.5 + 0.5;
-    float pixelSize = 1.0/108;
+    float pixelSize = 1.0/72;
 
     for(int i=-5; i<=5; i++)
         blurTextureCoords[i+5] = centerTexCoords + vec4(0.0, pixelSize*i, 0.0, 0.0);
