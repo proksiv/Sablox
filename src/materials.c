@@ -214,6 +214,7 @@ void materials_init()
     data.initial_lifetime = 0;
     data.is_fluid = false;
     data.hardness = 255;
+    data.use_noise = false;
     materials_data[Air] = data;
 
     data.name = "Stone";
@@ -223,6 +224,7 @@ void materials_init()
     data.initial_lifetime = 0;
     data.is_fluid = false;
     data.hardness = 1;
+    data.use_noise = true;
     materials_data[Stone] = data;
 
     data.name = "Sand";
@@ -232,6 +234,7 @@ void materials_init()
     data.initial_lifetime = 0;
     data.is_fluid = false;
     data.hardness = 1;
+    data.use_noise = true;
     materials_data[Sand] = data;
 
     data.name = "Wood";
@@ -241,6 +244,7 @@ void materials_init()
     data.initial_lifetime = 0;
     data.is_fluid = false;
     data.hardness = 1;
+    data.use_noise = true;
     materials_data[Wood] = data;
 
     data.name = "Fire";
@@ -250,6 +254,7 @@ void materials_init()
     data.initial_lifetime = 12;
     data.is_fluid = false;
     data.hardness = 1;
+    data.use_noise = true;
     materials_data[Fire] = data;
 
     data.name = "Water";
@@ -259,6 +264,7 @@ void materials_init()
     data.initial_lifetime = 0;
     data.is_fluid = true;
     data.hardness = 1;
+    data.use_noise = false;
     materials_data[Water] = data;
 
     data.name = "Acid";
@@ -268,6 +274,7 @@ void materials_init()
     data.initial_lifetime = 0;
     data.is_fluid = true;
     data.hardness = 255;
+    data.use_noise = false;
     materials_data[Acid] = data;
 
     data.name = "Smoke";
@@ -277,6 +284,7 @@ void materials_init()
     data.initial_lifetime = 255;
     data.is_fluid = false;
     data.hardness = 1;
+    data.use_noise = false;
     materials_data[Smoke] = data;
 
     data.name = "Ember";
@@ -286,6 +294,7 @@ void materials_init()
     data.initial_lifetime = 255;
     data.is_fluid = false;
     data.hardness = 1;
+    data.use_noise = true;
     materials_data[Ember] = data;
 
     data.name = "Oil";
@@ -295,6 +304,7 @@ void materials_init()
     data.initial_lifetime = 0;
     data.is_fluid = true;
     data.hardness = 1;
+    data.use_noise = false;
     materials_data[Oil] = data;
 
     data.name = "Obsidian";
@@ -304,6 +314,7 @@ void materials_init()
     data.initial_lifetime = 0;
     data.is_fluid = false;
     data.hardness = 255;
+    data.use_noise = true;
     materials_data[Obsidian] = data;
 
     data.name = "Lava";
@@ -313,6 +324,7 @@ void materials_init()
     data.initial_lifetime = 0;
     data.is_fluid = true;
     data.hardness = 255;
+    data.use_noise = true;
     materials_data[Lava] = data;
 }
 

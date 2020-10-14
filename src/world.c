@@ -92,10 +92,12 @@ MATERIAL world_get_cell_material(int cell_x, int cell_y)
 void world_set_cell_material(int cell_x, int cell_y, MATERIAL m)
 {
     world[cell_x][cell_y].m = (world_get_cell_updated(cell_x, cell_y) << 7) | m;
-    world_set_cell_lifetime(cell_x, cell_y, material_get_data(m).initial_lifetime);
 
-    ALLEGRO_COLOR color = material_get_data(world_get_cell_material(cell_x, cell_y)).color;
-    if(color.a > 0)
+    MATERIAL_DATA data = material_get_data(m);
+    world_set_cell_lifetime(cell_x, cell_y, data.initial_lifetime);
+
+    ALLEGRO_COLOR color = data.color;
+    if(data.use_noise)
     {
         color.r = clamp(color.r - 0.05 + (float)rand()/(float)(RAND_MAX/0.1), 0.0, 1.0);
         color.g = clamp(color.g - 0.05 + (float)rand()/(float)(RAND_MAX/0.1), 0.0, 1.0);

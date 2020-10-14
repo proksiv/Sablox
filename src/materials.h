@@ -19,6 +19,7 @@ typedef struct
     lifetime_t initial_lifetime;
     bool is_fluid;
     hardness_t hardness;
+    bool use_noise;
 } MATERIAL_DATA;
 
 void materials_init();
