@@ -69,6 +69,9 @@ void world_init()
     }
 
     vbuf = al_create_vertex_buffer(NULL, varray, CELLS_TO_RENDER*6, ALLEGRO_PRIM_BUFFER_STREAM);
+
+    Entity* test = entity_create();
+    test->velocity.x = 2;
 }
 
 bool world_get_cell_updated(int cell_x, int cell_y)
@@ -190,10 +193,13 @@ void world_update()
         }
     }
 
+    entities_update();
+
     steps++;
 }
 
 void world_render()
 {
     al_draw_vertex_buffer(vbuf, NULL, 0, CELLS_TO_RENDER*6, ALLEGRO_PRIM_TRIANGLE_LIST);
+    entities_render();
 }

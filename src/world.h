@@ -1,6 +1,7 @@
 #pragma once
 
 #include "materials.h"
+#include "entity.h"
 
 #define WORLD_W 386
 #define WORLD_H 218
