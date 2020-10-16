@@ -3,10 +3,11 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_image.h>
 
+#include "defines.h"
 #include "world.h"
 
-#define ASSETS_DIR "../assets"
 #define WINDOW_W 384
 #define WINDOW_H 216
 
@@ -65,16 +66,17 @@ int main()
     must_init(al_attach_shader_source_file(sh_blur_v, ALLEGRO_PIXEL_SHADER, al_path_cstr(path, '/')), "vertical_blur pixel shader source");
     must_init(al_build_shader(sh_blur_v), "vertical_blur shader build");
 
-    al_destroy_path(path);
-
     must_init(al_init_primitives_addon(), "primitives addon");
+
+    must_init(al_init_image_addon(), "image addon");
 
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_mouse_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
 
-    world_init();
+    world_init(path);
+    al_destroy_path(path);
 
     bool done = false;
     bool redraw = true;

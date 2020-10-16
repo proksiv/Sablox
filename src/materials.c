@@ -326,6 +326,16 @@ void materials_init()
     data.hardness = 255;
     data.use_noise = true;
     materials_data[Lava] = data;
+
+    data.name = "Entity Fragment";
+    data.update_routine = NULL;
+    data.color = al_map_rgb_f(1.0, 1.0, 1.0);
+    data.density = 0;
+    data.initial_lifetime = 1;
+    data.is_fluid = false;
+    data.hardness = 255;
+    data.use_noise = false;
+    materials_data[EntityFragment] = data;
 }
 
 MATERIAL_DATA material_get_data(MATERIAL m)

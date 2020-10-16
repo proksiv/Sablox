@@ -3,6 +3,7 @@
 #include <allegro5/allegro_primitives.h>
 
 #include "world.h"
+#include "defines.h"
 
 #define CELLS_TO_RENDER (WORLD_W - 2)*(WORLD_H - 2)
 const int RENDER_H = WORLD_H - 2;
@@ -48,7 +49,7 @@ static float clamp(float value, float min, float max)
 
 /* Public functions */
 
-void world_init()
+void world_init(ALLEGRO_PATH* path)
 {
     materials_init();
     memset(&world, 0, sizeof(world));
@@ -70,8 +71,17 @@ void world_init()
 
     vbuf = al_create_vertex_buffer(NULL, varray, CELLS_TO_RENDER*6, ALLEGRO_PRIM_BUFFER_STREAM);
 
+    al_set_path_filename(path, ASSETS_DIR"/mysha.png");
+    int d = al_get_new_bitmap_flags();
+    al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
+    ALLEGRO_BITMAP* bitmap = al_load_bitmap(al_path_cstr(path, '/'));
+    al_set_new_bitmap_flags(d);
     Entity* test = entity_create();
-    test->velocity.x = 2;
+    test->position = (Vector){.x = 80, .y = 100};
+    test->velocity = (Vector){.x = 0, .y = 0.5};
+    test->image.sprite = bitmap;
+    test->use_bitmap = true;
+    entity_render(test);
 }
 
 bool world_get_cell_updated(int cell_x, int cell_y)
@@ -119,6 +129,12 @@ lifetime_t world_get_cell_lifetime(int cell_x, int cell_y)
 void world_set_cell_lifetime(int cell_x, int cell_y, lifetime_t lifetime)
 {
     world[cell_x][cell_y].lifetime = lifetime;
+}
+
+void world_set_cell_color(int cell_x, int cell_y, ALLEGRO_COLOR color)
+{
+    world[cell_x][cell_y].color = color;
+    world_redraw_cell(cell_x, cell_y);
 }
 
 bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
@@ -201,5 +217,4 @@ void world_update()
 void world_render()
 {
     al_draw_vertex_buffer(vbuf, NULL, 0, CELLS_TO_RENDER*6, ALLEGRO_PRIM_TRIANGLE_LIST);
-    entities_render();
 }

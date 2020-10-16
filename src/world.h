@@ -8,7 +8,7 @@
 
 extern long steps;
 
-void world_init();
+void world_init(ALLEGRO_PATH* path);
 
 bool world_get_cell_updated(int cell_x, int cell_y);
 void world_set_cell_updated(int cell_x, int cell_y);
@@ -16,6 +16,7 @@ MATERIAL world_get_cell_material(int cell_x, int cell_y);
 void world_set_cell_material(int cell_x, int cell_y, MATERIAL m);
 lifetime_t world_get_cell_lifetime(int cell_x, int cell_y);
 void world_set_cell_lifetime(int cell_x, int cell_y, lifetime_t lifetime);
+void world_set_cell_color(int cell_x, int cell_y, ALLEGRO_COLOR color);
 
 bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y);
 void world_swap_cells(int ax, int ay, int bx, int by);

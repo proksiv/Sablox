@@ -1,5 +1,4 @@
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "entity.h"
@@ -23,16 +22,36 @@ Entity* entity_create()
 
     return &(new_node->entity);
 }
-
+void world_set_cell_material(int cell_x, int cell_y, int m);
+void world_set_cell_color(int cell_x, int cell_y, ALLEGRO_COLOR color);
 void entity_update(Entity* entity)
 {
     entity->position.x += entity->velocity.x;
     entity->position.y += entity->velocity.y;
+
+    if(entity->use_bitmap)
+    {
+        int w = al_get_bitmap_width(entity->image.sprite);
+        int h = al_get_bitmap_height(entity->image.sprite);
+        ALLEGRO_COLOR color;
+
+        int i, j;
+        for(i = 0; i < w; i++)
+        {
+            for(j = 0; j < h; j++)
+            {
+                world_set_cell_material((int)(entity->position.x) + i,(int)(entity->position.y) + j, 12);
+                color = al_get_pixel(entity->image.sprite, i, j);
+                world_set_cell_color((int)(entity->position.x) + i,(int)(entity->position.y) + j, color);
+            }
+        }
+    }
 }
+
 
 void entity_render(Entity* entity)
 {
-    printf("Pos: %f, %f\n", entity->position.x, entity->position.y);
+    
 }
 
 void entities_update()
