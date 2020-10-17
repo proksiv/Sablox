@@ -1,7 +1,7 @@
 #include "materials.h"
 #include "world.h"
 
-MATERIAL_DATA materials_data[MaterialCount];
+MaterialData materials_data[MATERIAL_COUNT];
 
 /* Private functions */
 
@@ -10,8 +10,8 @@ void material_postcheck_density(int x, int y)
     if(world_get_cell_updated(x, y) == steps % 2)
         return;
 
-    MATERIAL_DATA self = material_get_data(world_get_cell_material(x, y));
-    MATERIAL_DATA below = material_get_data(world_get_cell_material(x, y + 1));
+    MaterialData self = material_get_data(world_get_cell_material(x, y));
+    MaterialData below = material_get_data(world_get_cell_material(x, y + 1));
     if(below.density > 0 && self.density > below.density)
         world_swap_cells(x, y, x, y + 1);
 }
@@ -23,15 +23,15 @@ void material_postupdate_fluid(int x, int y)
 
     if(world_get_cell_material(x, y + 1))
     {
-        MATERIAL self = world_get_cell_material(x, y);
+        material_t self = world_get_cell_material(x, y);
 
-        MATERIAL dl = world_get_cell_material(x - 1, y + 1);
+        material_t dl = world_get_cell_material(x - 1, y + 1);
         bool free_dl = !dl || (material_get_data(dl).is_fluid && self != dl);
-        MATERIAL dr = world_get_cell_material(x + 1, y + 1);
+        material_t dr = world_get_cell_material(x + 1, y + 1);
         bool free_dr = !dr || (material_get_data(dr).is_fluid && self != dr);
-        MATERIAL l = world_get_cell_material(x - 1, y);
+        material_t l = world_get_cell_material(x - 1, y);
         bool free_l = !l || (material_get_data(l).is_fluid && self != l);
-        MATERIAL r = world_get_cell_material(x + 1, y);
+        material_t r = world_get_cell_material(x + 1, y);
         bool free_r = !r || (material_get_data(r).is_fluid && self != r);
 
         if(rand() % 2 && free_dr)
@@ -55,8 +55,8 @@ static void material_update_sand(int x, int y)
 {
     if(world_get_cell_material(x, y + 1))
     {
-        MATERIAL free_dl = !world_get_cell_material(x - 1, y + 1);
-        MATERIAL free_dr = !world_get_cell_material(x + 1, y + 1);
+        material_t free_dl = !world_get_cell_material(x - 1, y + 1);
+        material_t free_dr = !world_get_cell_material(x + 1, y + 1);
 
         if(rand() % 2 && free_dr)
             world_move_cell(x, y, x + 1, y + 1);
@@ -77,18 +77,18 @@ static void material_update_fire(int x, int y)
     {
         for(l = y - 1; l <= y + 1; l++)
         {
-            MATERIAL m = world_get_cell_material(k, l);
-            if(m == Wood)
+            material_t m = world_get_cell_material(k, l);
+            if(m == WOOD)
             {
-                world_set_cell_material(k, l, Ember);
+                world_set_cell_material(k, l, EMBER);
                 world_set_cell_updated(k, l);
             }
-            else if(m == Oil && rand() % 4 == 0)
+            else if(m == OIL && rand() % 4 == 0)
             {
-                world_set_cell_material(k, l, Fire);
+                world_set_cell_material(k, l, FIRE);
                 world_set_cell_updated(k, l);
                 if(!world_get_cell_material(x, y - 1))
-                    world_set_cell_material(x, y - 1, Smoke);
+                    world_set_cell_material(x, y - 1, SMOKE);
             }
         }
     }
@@ -109,7 +109,7 @@ static void material_update_acid(int x, int y)
             {
                 if(material_get_data(world_get_cell_material(k, l)).hardness < 255)
                 {
-                    world_set_cell_material(k, l, Air);
+                    world_set_cell_material(k, l, AIR);
                     world_set_cell_updated(k, l);
                     consumed = true;
                 }
@@ -118,15 +118,15 @@ static void material_update_acid(int x, int y)
     }
     
     if(consumed)
-        world_set_cell_material(x, y, Air);
+        world_set_cell_material(x, y, AIR);
 }
 
 static void material_update_smoke(int x, int y)
 {
     if(world_get_cell_material(x, y - 1))
     {
-        MATERIAL free_ul = !world_get_cell_material(x - 1, y - 1);
-        MATERIAL free_ur = !world_get_cell_material(x + 1, y - 1);
+        material_t free_ul = !world_get_cell_material(x - 1, y - 1);
+        material_t free_ur = !world_get_cell_material(x + 1, y - 1);
 
         if(steps % 2 && free_ur)
             world_move_cell(x, y, x + 1, y - 1);
@@ -149,14 +149,14 @@ static void material_update_ember(int x, int y)
         {
             for(l = y - 1; l <= y + 1; l++)
             {
-                if(world_get_cell_material(k, l) == Wood)
+                if(world_get_cell_material(k, l) == WOOD)
                 {
-                    world_set_cell_material(k, l, Ember);
+                    world_set_cell_material(k, l, EMBER);
                     world_set_cell_updated(k, l);
                 }
-                else if(world_get_cell_material(k, l) == Oil)
+                else if(world_get_cell_material(k, l) == OIL)
                 {
-                    world_set_cell_material(k, l, Fire);
+                    world_set_cell_material(k, l, FIRE);
                     world_set_cell_updated(k, l);
                 }
             }
@@ -166,9 +166,9 @@ static void material_update_ember(int x, int y)
     if(!world_get_cell_material(x, y - 1))
     {
         if(rand() % (255 - world_get_cell_lifetime(x, y)) == 0)
-            world_set_cell_material(x, y - 1, Fire);
+            world_set_cell_material(x, y - 1, FIRE);
         else if(rand() % 12 == 0)
-            world_set_cell_material(x, y - 1, Smoke);
+            world_set_cell_material(x, y - 1, SMOKE);
     }
 }
 
@@ -180,21 +180,21 @@ static void material_update_lava(int x, int y)
     {
         for(l = y - 1; l <= y + 1; l++)
         {
-            MATERIAL m = world_get_cell_material(k, l);
-            if(m == Wood)
+            material_t m = world_get_cell_material(k, l);
+            if(m == WOOD)
             {
-                world_set_cell_material(k, l, Ember);
+                world_set_cell_material(k, l, EMBER);
                 world_set_cell_updated(k, l);
             }
-            else if(m == Oil)
+            else if(m == OIL)
             {
-                world_set_cell_material(k, l, Fire);
+                world_set_cell_material(k, l, FIRE);
                 world_set_cell_updated(k, l);
                 if(!world_get_cell_material(x, y - 1))
-                    world_set_cell_material(x, y - 1, Smoke);
+                    world_set_cell_material(x, y - 1, SMOKE);
             }
-            else if(m == Water)
-                world_set_cell_material(x, y, Obsidian);
+            else if(m == WATER)
+                world_set_cell_material(x, y, OBSIDIAN);
         }
     }
 }
@@ -203,7 +203,7 @@ static void material_update_lava(int x, int y)
 
 void materials_init()
 {
-    MATERIAL_DATA data;
+    MaterialData data;
 
     data.name = "Air";
     data.update_routine = NULL;
@@ -213,7 +213,7 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 255;
     data.use_noise = false;
-    materials_data[Air] = data;
+    materials_data[AIR] = data;
 
     data.name = "Stone";
     data.update_routine = NULL;
@@ -223,7 +223,7 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 1;
     data.use_noise = true;
-    materials_data[Stone] = data;
+    materials_data[STONE] = data;
 
     data.name = "Sand";
     data.update_routine = &material_update_sand;
@@ -233,7 +233,7 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 1;
     data.use_noise = true;
-    materials_data[Sand] = data;
+    materials_data[SAND] = data;
 
     data.name = "Wood";
     data.update_routine = NULL;
@@ -243,7 +243,7 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 1;
     data.use_noise = true;
-    materials_data[Wood] = data;
+    materials_data[WOOD] = data;
 
     data.name = "Fire";
     data.update_routine = &material_update_fire;
@@ -253,7 +253,7 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 1;
     data.use_noise = true;
-    materials_data[Fire] = data;
+    materials_data[FIRE] = data;
 
     data.name = "Water";
     data.update_routine = NULL;
@@ -263,7 +263,7 @@ void materials_init()
     data.is_fluid = true;
     data.hardness = 1;
     data.use_noise = false;
-    materials_data[Water] = data;
+    materials_data[WATER] = data;
 
     data.name = "Acid";
     data.update_routine = &material_update_acid;
@@ -273,7 +273,7 @@ void materials_init()
     data.is_fluid = true;
     data.hardness = 255;
     data.use_noise = false;
-    materials_data[Acid] = data;
+    materials_data[ACID] = data;
 
     data.name = "Smoke";
     data.update_routine = &material_update_smoke;
@@ -283,7 +283,7 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 1;
     data.use_noise = false;
-    materials_data[Smoke] = data;
+    materials_data[SMOKE] = data;
 
     data.name = "Ember";
     data.update_routine = &material_update_ember;
@@ -293,7 +293,7 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 1;
     data.use_noise = true;
-    materials_data[Ember] = data;
+    materials_data[EMBER] = data;
 
     data.name = "Oil";
     data.update_routine = NULL;
@@ -303,7 +303,7 @@ void materials_init()
     data.is_fluid = true;
     data.hardness = 1;
     data.use_noise = false;
-    materials_data[Oil] = data;
+    materials_data[OIL] = data;
 
     data.name = "Obsidian";
     data.update_routine = NULL;
@@ -313,7 +313,7 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 255;
     data.use_noise = true;
-    materials_data[Obsidian] = data;
+    materials_data[OBSIDIAN] = data;
 
     data.name = "Lava";
     data.update_routine = &material_update_lava;
@@ -323,7 +323,7 @@ void materials_init()
     data.is_fluid = true;
     data.hardness = 255;
     data.use_noise = true;
-    materials_data[Lava] = data;
+    materials_data[LAVA] = data;
 
     data.name = "Entity Fragment";
     data.update_routine = NULL;
@@ -333,10 +333,10 @@ void materials_init()
     data.is_fluid = false;
     data.hardness = 255;
     data.use_noise = false;
-    materials_data[EntityFragment] = data;
+    materials_data[ENTITY_FRAGMENT] = data;
 }
 
-MATERIAL_DATA material_get_data(MATERIAL m)
+MaterialData material_get_data(material_t m)
 {
     return materials_data[m];
 }

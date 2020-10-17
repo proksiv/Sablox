@@ -82,7 +82,7 @@ int main()
 
     ALLEGRO_MOUSE_STATE state;
 
-    MATERIAL mat = Air;
+    material_t mat = AIR;
 
     al_start_timer(timer);
     while(1)
@@ -93,7 +93,7 @@ int main()
         {
             case ALLEGRO_EVENT_TIMER:
                 al_get_mouse_state(&state);
-                mat = state.z % MaterialCount;
+                mat = state.z % MATERIAL_COUNT;
 
                 if(state.buttons & 1)
                     world_paint(state.x/sx + 1, state.y/sy + 1, mat);

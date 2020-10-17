@@ -8,13 +8,13 @@
 #define CELLS_TO_RENDER (WORLD_W - 2)*(WORLD_H - 2)
 #define RENDER_H (WORLD_H - 2)
 
-typedef struct {
-    MATERIAL m;
+typedef struct Cell_s {
+    material_t m;
     lifetime_t lifetime;
     ALLEGRO_COLOR color;
-} CELL;
+} Cell;
 
-CELL world[WORLD_W][WORLD_H];
+Cell world[WORLD_W][WORLD_H];
 
 ALLEGRO_VERTEX varray[CELLS_TO_RENDER*6];
 ALLEGRO_VERTEX_BUFFER* vbuf;
@@ -38,10 +38,10 @@ static void world_redraw_cell(int cell_x, int cell_y)
 
 static void world_check_cell_lifetime(int cell_x, int cell_y)
 {
-    CELL* cell = &(world[cell_x][cell_y]);
+    Cell* cell = &(world[cell_x][cell_y]);
     cell->lifetime--;
     if(cell->lifetime == 0)
-        world_set_cell_material(cell_x, cell_y, Air);
+        world_set_cell_material(cell_x, cell_y, AIR);
 }
 
 static float clamp(float value, float min, float max)
@@ -68,7 +68,7 @@ void world_init()
         v[1].x = v[4].x = v[5].x = cell_x + 1;
         v[2].y = v[3].y = v[4].y = cell_y + 1;
         v[0].z = v[1].z = v[2].z = v[3].z = v[4].z = v[5].z = 0;
-        v[0].color = v[1].color = v[2].color = v[3].color = v[4].color = v[5].color = material_get_data(Air).color;
+        v[0].color = v[1].color = v[2].color = v[3].color = v[4].color = v[5].color = material_get_data(AIR).color;
     }
 
     vbuf = al_create_vertex_buffer(NULL, varray, CELLS_TO_RENDER*6, ALLEGRO_PRIM_BUFFER_STREAM);
@@ -89,19 +89,19 @@ void world_set_cell_updated(int cell_x, int cell_y)
         world[cell_x][cell_y].m &= (~(1 << 7));
 }
 
-MATERIAL world_get_cell_material(int cell_x, int cell_y)
+material_t world_get_cell_material(int cell_x, int cell_y)
 {
     return (world[cell_x][cell_y].m & 63);
 }
 
-void world_set_cell_material(int cell_x, int cell_y, MATERIAL m)
+void world_set_cell_material(int cell_x, int cell_y, material_t m)
 {
     world[cell_x][cell_y].m = (world_get_cell_updated(cell_x, cell_y) << 7) | m;
 
-    MATERIAL_DATA data = material_get_data(m);
+    MaterialData data = material_get_data(m);
     world_set_cell_lifetime(cell_x, cell_y, data.initial_lifetime);
 
-    if(m == EntityFragment)
+    if(m == ENTITY_FRAGMENT)
         return;
 
     ALLEGRO_COLOR color = data.color;
@@ -137,11 +137,11 @@ bool world_move_cell(int src_x, int src_y, int dst_x, int dst_y)
     if(world_get_cell_material(dst_x, dst_y))
         return false;
 
-    memcpy(&(world[dst_x][dst_y]), &(world[src_x][src_y]), sizeof(CELL));
+    memcpy(&(world[dst_x][dst_y]), &(world[src_x][src_y]), sizeof(Cell));
     world_redraw_cell(dst_x, dst_y);
     world_set_cell_updated(dst_x, dst_y);
 
-    world_set_cell_material(src_x, src_y, Air);
+    world_set_cell_material(src_x, src_y, AIR);
     return true;
 }
 
@@ -150,17 +150,17 @@ void world_swap_cells(int ax, int ay, int bx, int by)
     if(material_get_data(world_get_cell_material(ax, ay)).density < material_get_data(world_get_cell_material(bx, by)).density)
         return;
 
-    CELL temp = world[ax][ay];
-    memcpy(&(world[ax][ay]), &(world[bx][by]), sizeof(CELL));
+    Cell temp = world[ax][ay];
+    memcpy(&(world[ax][ay]), &(world[bx][by]), sizeof(Cell));
     world_redraw_cell(ax, ay);
     world_set_cell_updated(ax, ay);
 
-    memcpy(&(world[bx][by]), &temp, sizeof(CELL));
+    memcpy(&(world[bx][by]), &temp, sizeof(Cell));
     world_redraw_cell(bx, by);
     world_set_cell_updated(bx, by);
 }
 
-void world_paint(int cell_x, int cell_y, MATERIAL m)
+void world_paint(int cell_x, int cell_y, material_t m)
 {
     if (cell_x < 0 || cell_y < 0 || cell_x >= WORLD_W || cell_y >= WORLD_H)
         return;
@@ -189,7 +189,7 @@ void world_update()
             if(world_get_cell_updated(i, j) == (steps % 2))
                 continue;
 
-            MATERIAL_DATA data = material_get_data(world_get_cell_material(i, j));
+            MaterialData data = material_get_data(world_get_cell_material(i, j));
 
             if(data.initial_lifetime > 0)
                 world_check_cell_lifetime(i, j);

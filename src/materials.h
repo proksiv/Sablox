@@ -7,10 +7,10 @@ typedef unsigned char hardness_t;
 
 typedef enum
 {
-    Air, Stone, Sand, Wood, Fire, Water, Acid, Smoke, Ember, Oil, Obsidian, Lava, EntityFragment, MaterialCount
-} MATERIAL;
+    AIR, STONE, SAND, WOOD, FIRE, WATER, ACID, SMOKE, EMBER, OIL, OBSIDIAN, LAVA, ENTITY_FRAGMENT, MATERIAL_COUNT
+} material_t;
 
-typedef struct
+typedef struct MaterialData_s
 {
     const char* name;
     void (*update_routine)(int, int);
@@ -20,8 +20,8 @@ typedef struct
     bool is_fluid;
     hardness_t hardness;
     bool use_noise;
-} MATERIAL_DATA;
+} MaterialData;
 
 void materials_init();
 
-MATERIAL_DATA material_get_data(MATERIAL m);
+MaterialData material_get_data(material_t m);

@@ -13,7 +13,7 @@ EntityNode* entity_head = NULL;
 
 void world_set_cell_material(int cell_x, int cell_y, int m);
 void world_set_cell_color(int cell_x, int cell_y, ALLEGRO_COLOR color);
-Entity* entity_create(ENTITY_TYPE type, const char* image_filename, Vector position)
+Entity* entity_create(entity_type_t type, const char* image_filename, Vector position)
 {
     EntityNode* new_node = malloc(sizeof(EntityNode));
 

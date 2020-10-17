@@ -4,7 +4,7 @@
 
 typedef enum {
     Static, Kinematic
-} ENTITY_TYPE;
+} entity_type_t;
 
 typedef struct Vector_s {
     float x;
@@ -12,13 +12,13 @@ typedef struct Vector_s {
 } Vector;
 
 typedef struct Entity_s {
-    ENTITY_TYPE type;
+    entity_type_t type;
     ALLEGRO_BITMAP* image;
     Vector position;
     Vector velocity;
 } Entity;
 
-Entity* entity_create(ENTITY_TYPE type, const char* image_filename, Vector position);
+Entity* entity_create(entity_type_t type, const char* image_filename, Vector position);
 
 void entities_update();
 void entity_render(Entity* entity);
