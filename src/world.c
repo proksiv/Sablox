@@ -2,11 +2,11 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_primitives.h>
 
+#include "globals.h"
 #include "world.h"
-#include "defines.h"
 
 #define CELLS_TO_RENDER (WORLD_W - 2)*(WORLD_H - 2)
-const int RENDER_H = WORLD_H - 2;
+#define RENDER_H (WORLD_H - 2)
 
 typedef struct {
     MATERIAL m;
@@ -18,6 +18,8 @@ CELL world[WORLD_W][WORLD_H];
 
 ALLEGRO_VERTEX varray[CELLS_TO_RENDER*6];
 ALLEGRO_VERTEX_BUFFER* vbuf;
+
+long steps = 0;
 
 /* Private functions */
 
@@ -49,7 +51,7 @@ static float clamp(float value, float min, float max)
 
 /* Public functions */
 
-void world_init(ALLEGRO_PATH* path)
+void world_init()
 {
     materials_init();
     memset(&world, 0, sizeof(world));
@@ -71,17 +73,7 @@ void world_init(ALLEGRO_PATH* path)
 
     vbuf = al_create_vertex_buffer(NULL, varray, CELLS_TO_RENDER*6, ALLEGRO_PRIM_BUFFER_STREAM);
 
-    al_set_path_filename(path, ASSETS_DIR"/mysha.png");
-    int d = al_get_new_bitmap_flags();
-    al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
-    ALLEGRO_BITMAP* bitmap = al_load_bitmap(al_path_cstr(path, '/'));
-    al_set_new_bitmap_flags(d);
-    Entity* test = entity_create();
-    test->position = (Vector){.x = 80, .y = 100};
-    test->velocity = (Vector){.x = 0, .y = 0.5};
-    test->image.sprite = bitmap;
-    test->use_bitmap = true;
-    entity_render(test);
+    entity_create(Static, ASSETS_DIR"/mysha.png", (Vector){.x = 80, .y = 100});
 }
 
 bool world_get_cell_updated(int cell_x, int cell_y)
@@ -108,6 +100,9 @@ void world_set_cell_material(int cell_x, int cell_y, MATERIAL m)
 
     MATERIAL_DATA data = material_get_data(m);
     world_set_cell_lifetime(cell_x, cell_y, data.initial_lifetime);
+
+    if(m == EntityFragment)
+        return;
 
     ALLEGRO_COLOR color = data.color;
     if(data.use_noise)

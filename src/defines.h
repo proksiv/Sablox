@@ -1,1 +1,0 @@
-#define ASSETS_DIR "../assets"

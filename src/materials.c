@@ -1,8 +1,6 @@
 #include "materials.h"
 #include "world.h"
 
-long steps;
-
 MATERIAL_DATA materials_data[MaterialCount];
 
 /* Private functions */
@@ -331,7 +329,7 @@ void materials_init()
     data.update_routine = NULL;
     data.color = al_map_rgb_f(1.0, 1.0, 1.0);
     data.density = 0;
-    data.initial_lifetime = 1;
+    data.initial_lifetime = 0;
     data.is_fluid = false;
     data.hardness = 255;
     data.use_noise = false;

@@ -1,15 +1,17 @@
 #include <stdio.h>
-
+#include <string.h>
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
 
-#include "defines.h"
+#include "globals.h"
 #include "world.h"
 
 #define WINDOW_W 384
 #define WINDOW_H 216
+
+ALLEGRO_PATH* path = NULL;
 
 void must_init(bool test, const char *description)
 {
@@ -17,6 +19,18 @@ void must_init(bool test, const char *description)
 
     printf("couldn't initialize %s\n", description);
     exit(1);
+}
+
+ALLEGRO_SHADER* make_shader(const char* v_path, const char* p_path, const char* name)
+{
+    ALLEGRO_SHADER* shader = al_create_shader(ALLEGRO_SHADER_GLSL);
+    must_init(shader, name);
+    al_set_path_filename(path, v_path);
+    must_init(al_attach_shader_source_file(shader, ALLEGRO_VERTEX_SHADER, al_path_cstr(path, '/')), al_get_shader_log(shader));
+    al_set_path_filename(path, p_path);
+    must_init(al_attach_shader_source_file(shader, ALLEGRO_PIXEL_SHADER, al_path_cstr(path, '/')), al_get_shader_log(shader));
+    must_init(al_build_shader(shader), al_get_shader_log(shader));
+    return shader;
 }
 
 int main()
@@ -40,31 +54,11 @@ int main()
     ALLEGRO_FONT* font = al_create_builtin_font();
     must_init(font, "font");
 
-    ALLEGRO_PATH* path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
+    path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
 
-    ALLEGRO_SHADER* sh_brightness_filter = al_create_shader(ALLEGRO_SHADER_GLSL);
-    must_init(sh_brightness_filter, "brightness_filter shader");
-    al_set_path_filename(path, ASSETS_DIR"/shader/brightness_filter_v.glsl");
-    must_init(al_attach_shader_source_file(sh_brightness_filter, ALLEGRO_VERTEX_SHADER, al_path_cstr(path, '/')), "brightness_filter vertex shader source");
-    al_set_path_filename(path, ASSETS_DIR"/shader/brightness_filter_p.glsl");
-    must_init(al_attach_shader_source_file(sh_brightness_filter, ALLEGRO_PIXEL_SHADER, al_path_cstr(path, '/')), "brightness_filter pixel shader source");
-    must_init(al_build_shader(sh_brightness_filter), "brightness_filter shader build");
-
-    ALLEGRO_SHADER* sh_blur_h = al_create_shader(ALLEGRO_SHADER_GLSL);
-    must_init(sh_blur_h, "horizontal_blur shader");
-    al_set_path_filename(path, ASSETS_DIR"/shader/horizontal_blur_v.glsl");
-    must_init(al_attach_shader_source_file(sh_blur_h, ALLEGRO_VERTEX_SHADER, al_path_cstr(path, '/')), "horizontal_blur vertex shader source");
-    al_set_path_filename(path, ASSETS_DIR"/shader/blur_p.glsl");
-    must_init(al_attach_shader_source_file(sh_blur_h, ALLEGRO_PIXEL_SHADER, al_path_cstr(path, '/')), "horizontal_blur pixel shader source");
-    must_init(al_build_shader(sh_blur_h), "horizontal_blur shader build");
-
-    ALLEGRO_SHADER* sh_blur_v = al_create_shader(ALLEGRO_SHADER_GLSL);
-    must_init(sh_blur_v, "vertical_blur shader");
-    al_set_path_filename(path, ASSETS_DIR"/shader/vertical_blur_v.glsl");
-    must_init(al_attach_shader_source_file(sh_blur_v, ALLEGRO_VERTEX_SHADER, al_path_cstr(path, '/')), "vertical_blur vertex shader source");
-    al_set_path_filename(path, ASSETS_DIR"/shader/blur_p.glsl");
-    must_init(al_attach_shader_source_file(sh_blur_v, ALLEGRO_PIXEL_SHADER, al_path_cstr(path, '/')), "vertical_blur pixel shader source");
-    must_init(al_build_shader(sh_blur_v), "vertical_blur shader build");
+    ALLEGRO_SHADER* sh_brightness_filter = make_shader(ASSETS_DIR"/shader/brightness_filter_v.glsl", ASSETS_DIR"/shader/brightness_filter_p.glsl", "brightness filter");
+    ALLEGRO_SHADER* sh_blur_h = make_shader(ASSETS_DIR"/shader/horizontal_blur_v.glsl", ASSETS_DIR"/shader/blur_p.glsl", "horizontal blur");
+    ALLEGRO_SHADER* sh_blur_v = make_shader(ASSETS_DIR"/shader/vertical_blur_v.glsl", ASSETS_DIR"/shader/blur_p.glsl", "vertical blur");
 
     must_init(al_init_primitives_addon(), "primitives addon");
 
@@ -75,8 +69,7 @@ int main()
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
 
-    world_init(path);
-    al_destroy_path(path);
+    world_init();
 
     bool done = false;
     bool redraw = true;
